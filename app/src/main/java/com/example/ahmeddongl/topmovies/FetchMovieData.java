@@ -41,7 +41,7 @@ public class FetchMovieData extends AsyncTask<String, Void, List<Movie>> {
                     "http://api.themoviedb.org/3/discover/movie?";
             final String SORT_PARAM = "sort_by";
             final String API_PARAM = "api_key";
-            final String API_KEY = "b821c2f9d27847f2406a800b7a3afe84";
+            final String API_KEY = "";
 
             //Url of json file no need to uri builder
             Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()

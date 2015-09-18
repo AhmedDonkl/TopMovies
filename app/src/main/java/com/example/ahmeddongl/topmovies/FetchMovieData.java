@@ -1,8 +1,14 @@
 package com.example.ahmeddongl.topmovies;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.example.ahmeddongl.topmovies.Data.MoviesContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,6 +22,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * Created by Ahmed Dongl on 8/22/2015.
@@ -24,8 +31,14 @@ import java.util.List;
 /*this class responsible for fetch movie data from api */
 public class FetchMovieData extends AsyncTask<String, Void, List<Movie>> {
 
+    private final Context mContext;
+
+    public FetchMovieData(Context context) {
+        mContext = context;
+    }
+
     @Override
-    protected  List<Movie> doInBackground(String... params) {
+    protected List<Movie> doInBackground(String... params) {
 
         // These two need to be declared outside the try/catch
         // so that they can be closed in the finally block.
@@ -41,7 +54,7 @@ public class FetchMovieData extends AsyncTask<String, Void, List<Movie>> {
                     "http://api.themoviedb.org/3/discover/movie?";
             final String SORT_PARAM = "sort_by";
             final String API_PARAM = "api_key";
-            final String API_KEY = "";
+            final String API_KEY = "b821c2f9d27847f2406a800b7a3afe84";
 
             //Url of json file no need to uri builder
             Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
@@ -102,10 +115,10 @@ public class FetchMovieData extends AsyncTask<String, Void, List<Movie>> {
 
         try
         {
-            return GetMovieDataFromJson(movieJsonStr);
+            return GetMovieDataFromJson(movieJsonStr,params[0]);
         } catch (JSONException e) {
             e.printStackTrace();
-            Log.i("Error",e.getMessage());
+            Log.i("Error", e.getMessage());
         }
 
         // This will only happen if there was an error getting or parsing the forecast.
@@ -122,10 +135,7 @@ public class FetchMovieData extends AsyncTask<String, Void, List<Movie>> {
         }
     }
 
-    private List<Movie> GetMovieDataFromJson(String movieJsonStr) throws JSONException {
-
-        //CREATE new array from Movie class to save data on it
-        List<Movie> movieResult = new ArrayList<Movie>();
+    private List<Movie> GetMovieDataFromJson(String movieJsonStr, String sortBy) throws JSONException {
 
         // These are the names of the JSON objects that need to be extracted.
         final String Array_RESULT = "results";
@@ -139,23 +149,66 @@ public class FetchMovieData extends AsyncTask<String, Void, List<Movie>> {
         JSONObject movieJson = new JSONObject(movieJsonStr);
         JSONArray movieArray = movieJson.getJSONArray(Array_RESULT);
 
+        // Insert the new Movies information into the database
+        Vector<ContentValues> cVVector = new Vector<ContentValues>(movieArray.length());
+
         for(int i = 0; i < movieArray.length(); i++) {
             // Get the JSON object representing the time
             JSONObject movieObject = movieArray.getJSONObject(i);
 
-            //get data from Object and append to movie list
-            movieResult.add(new Movie(
-                            movieObject.getInt(MOVIE_ID),
-                            movieObject.getString(MOVIE_ORIGINAL_TITLE),
-                            movieObject.getString(MOVIE_RELEASE_DATE),
-                            movieObject.getString(MOVIE_OVERVIEW),
-                            movieObject.getString(MOVIE_POSTER_PATH),
-                            movieObject.getDouble(MOVIE_VOTE_AVERAGE)
-            ));
+            //get data from Object and append to content Values Vector
+            ContentValues weatherValues = new ContentValues();
+
+            weatherValues.put(MoviesContract.MoviesEntry.COLUMN_MOV_ID, movieObject.getInt(MOVIE_ID));
+            weatherValues.put(MoviesContract.MoviesEntry.COLUMN_MOV_ORIGINAL_TITLE, movieObject.getString(MOVIE_ORIGINAL_TITLE));
+            weatherValues.put(MoviesContract.MoviesEntry.COLUMN_MOV_RELEASE_DATE, movieObject.getString(MOVIE_RELEASE_DATE));
+            weatherValues.put(MoviesContract.MoviesEntry.COLUMN_MOV_OVERVIEW, movieObject.getString(MOVIE_OVERVIEW));
+            weatherValues.put(MoviesContract.MoviesEntry.COLUMN_MOV_POSTER_PATH, movieObject.getString(MOVIE_POSTER_PATH));
+            weatherValues.put(MoviesContract.MoviesEntry.COLUMN_MOV_VOTE_AVERAGE, movieObject.getDouble(MOVIE_VOTE_AVERAGE));
+            weatherValues.put(MoviesContract.MoviesEntry.COLUMN_MOV_SORT_BY, sortBy);
+
+            cVVector.add(weatherValues);
+        }
+
+        // build uri to get cursor with Sort by
+        Uri moviesBySort = MoviesContract.MoviesEntry.buildMoviesUriWithSortBy(sortBy);
+
+        int deleted = 0;
+        //delete data from database which have same sort by
+        deleted = mContext.getContentResolver().delete(moviesBySort,null,null);
+        Log.d("Row Deleted ",String.valueOf(deleted));
+
+        int inserted = 0;
+        // add to database
+        if ( cVVector.size() > 0 ) {
+            ContentValues[] cvArray = new ContentValues[cVVector.size()];
+            cVVector.toArray(cvArray);
+            inserted = mContext.getContentResolver().bulkInsert(MoviesContract.MoviesEntry.CONTENT_URI, cvArray);
+        }
+        Log.d("Row Inserted ",String.valueOf(inserted));
+
+        Cursor cur = mContext.getContentResolver().query(moviesBySort, null, null, null, null);
+
+        //CREATE new array from Movie class to save data on it
+        List<Movie> movieResult = new ArrayList<Movie>();
+
+        if ( cur.moveToFirst() ) {
+            do {
+                ContentValues cv = new ContentValues();
+                DatabaseUtils.cursorRowToContentValues(cur, cv);
+                //get data from Object and append to movie list
+                movieResult.add(new Movie(
+                        cv.getAsInteger(MoviesContract.MoviesEntry.COLUMN_MOV_ID),
+                        cv.getAsString(MoviesContract.MoviesEntry.COLUMN_MOV_ORIGINAL_TITLE),
+                        cv.getAsString(MoviesContract.MoviesEntry.COLUMN_MOV_RELEASE_DATE),
+                        cv.getAsString(MoviesContract.MoviesEntry.COLUMN_MOV_OVERVIEW),
+                        cv.getAsString(MoviesContract.MoviesEntry.COLUMN_MOV_POSTER_PATH),
+                        cv.getAsDouble(MoviesContract.MoviesEntry.COLUMN_MOV_VOTE_AVERAGE)
+                ));
+            } while (cur.moveToNext());
         }
 
         return movieResult;
-
     }
 
 }

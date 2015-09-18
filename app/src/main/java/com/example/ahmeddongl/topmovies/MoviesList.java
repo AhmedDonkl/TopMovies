@@ -11,5 +11,4 @@ public class MoviesList extends ActionBarActivity {
         setContentView(R.layout.activity_movies_list);
     }
 
-
 }

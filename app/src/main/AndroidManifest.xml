@@ -38,6 +38,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.ahmeddongl.topmovies.MoviesList" />
         </activity>
+        <provider
+                android:authorities="com.example.ahmeddongl.topmovies"
+                android:name=".Data.MoviesProvider" />
     </application>
 
 </manifest>

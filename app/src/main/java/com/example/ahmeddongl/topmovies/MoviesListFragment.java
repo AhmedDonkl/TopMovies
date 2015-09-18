@@ -58,6 +58,7 @@ public class MoviesListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        updateMovies();
         // Add this line in order for this fragment to handle menu events.
         setHasOptionsMenu(true);
     }
@@ -91,7 +92,7 @@ public class MoviesListFragment extends Fragment {
     }
 
     public  void updateMovies() {
-        FetchMovieData movieTask = new FetchMovieData();
+        FetchMovieData movieTask = new FetchMovieData(getActivity());
        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sortBy = prefs.getString(getString(R.string.pref_sort_key),
                 getString(R.string.pref_sort_default));

@@ -1,12 +1,10 @@
 package com.example.ahmeddongl.topmovies;
 
-import java.io.Serializable;
-
 /**
  * Created by Ahmed Dongl on 9/3/2015.
  */
 /*This Class will represent a Movie*/
-public class Movie implements Serializable {
+public class Movie {
 
      int mId;
      String mOriginalTitle;

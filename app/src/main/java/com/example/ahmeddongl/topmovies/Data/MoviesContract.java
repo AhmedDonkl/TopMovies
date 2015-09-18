@@ -67,8 +67,8 @@ public class MoviesContract {
             return CONTENT_URI.buildUpon().appendPath(sortBy).build();
         }
 
-        public static Uri buildMoviesUriWithMovieId(String movieId) {
-            return CONTENT_URI.buildUpon().appendPath(movieId).build();
+        public static Uri buildMoviesUriWithMovieId(double movieId) {
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(movieId)).build();
         }
 
     }

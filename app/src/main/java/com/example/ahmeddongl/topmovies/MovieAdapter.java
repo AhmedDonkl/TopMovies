@@ -1,16 +1,15 @@
 package com.example.ahmeddongl.topmovies;
 
-import android.app.Activity;
+import android.content.Context;
+import android.database.Cursor;
+import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
-
-import java.util.List;
 
 /**
  * Created by Ahmed Dongl on 9/3/2015.
@@ -24,49 +23,44 @@ class ViewHolder {
 }
 
 /*This is our adapter for the movies */
-public class MovieAdapter extends ArrayAdapter<Movie> {
+public class MovieAdapter extends CursorAdapter {
 
-    Activity mActivity;
-    int mLayoutResourceId;
-    List<Movie> mMovieItems = null;
+    ViewHolder  holder = null;
 
-    public MovieAdapter(Activity mActivity,int mLayoutResourceId,List<Movie> mMovieItems) {
-        super(mActivity,mLayoutResourceId,mMovieItems);
-        this.mActivity = mActivity;
-        this.mLayoutResourceId = mLayoutResourceId;
-        this.mMovieItems=mMovieItems;
+    public MovieAdapter(Context context, Cursor c, int flags) {
+        super(context, c, flags);
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        View view = LayoutInflater.from(context).inflate(R.layout.movie_item, parent, false);
 
-        ViewHolder  holder = null;
+        // well set up the ViewHolder
+        holder = new ViewHolder();
+        holder.mMoviePicture = (ImageView) view.findViewById(R.id.movie_picture);
+        holder.mMovieText = (TextView) view.findViewById(R.id.movie_text);
+        // store the holder with the view.
+        view.setTag(holder);
 
-        if (convertView == null) {
+        return view;
+    }
 
-            // inflate the layout
-            LayoutInflater inflater = ((Activity)mActivity).getLayoutInflater();
-            convertView = inflater.inflate(mLayoutResourceId, parent, false);
+    /*
+        This is where we fill-in the views with the contents of the cursor.
+     */
+    @Override
+    public void bindView(View view, Context context, Cursor cursor) {
 
-            // well set up the ViewHolder
-            holder = new ViewHolder();
-            holder.mMoviePicture = (ImageView) convertView.findViewById(R.id.movie_picture);
-            holder.mMovieText = (TextView) convertView.findViewById(R.id.movie_text);
-            // store the holder with the view.
-            convertView.setTag(holder);
-        }
-        else {
-            // we've just avoided calling findViewById() on resource every time
-            // just use the viewHolder
-            holder = (ViewHolder) convertView.getTag();
-        }
+        // we've just avoided calling findViewById() on resource every time
+        // just use the viewHolder
+        holder = (ViewHolder) view.getTag();
 
-        Movie movieItem = mMovieItems.get(position);
+        Movie movieItem = Utility.convertCursorRowToMovieObject(cursor);
         holder.mMovieText.setText(movieItem.mOriginalTitle);
         //load image with picasso and append base path url
-        Picasso.with(mActivity).load("http://image.tmdb.org/t/p/w185"+movieItem.mPosterPath).into(holder.mMoviePicture);
+        Picasso.with(context).load("http://image.tmdb.org/t/p/w185"+movieItem.mPosterPath).into(holder.mMoviePicture);
 
-        return convertView;
     }
+
 }
 

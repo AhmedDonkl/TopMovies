@@ -2,8 +2,6 @@ package com.example.ahmeddongl.topmovies;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -20,8 +18,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 
 /**
@@ -29,7 +25,7 @@ import java.util.Vector;
  */
 
 /*this class responsible for fetch movie data from api */
-public class FetchMovieData extends AsyncTask<String, Void, List<Movie>> {
+public class FetchMovieData extends AsyncTask<String, Void, Void> {
 
     private final Context mContext;
 
@@ -38,7 +34,7 @@ public class FetchMovieData extends AsyncTask<String, Void, List<Movie>> {
     }
 
     @Override
-    protected List<Movie> doInBackground(String... params) {
+    protected Void doInBackground(String... params) {
 
         // These two need to be declared outside the try/catch
         // so that they can be closed in the finally block.
@@ -54,7 +50,7 @@ public class FetchMovieData extends AsyncTask<String, Void, List<Movie>> {
                     "http://api.themoviedb.org/3/discover/movie?";
             final String SORT_PARAM = "sort_by";
             final String API_PARAM = "api_key";
-            final String API_KEY = "b821c2f9d27847f2406a800b7a3afe84";
+            final String API_KEY = "";
 
             //Url of json file no need to uri builder
             Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
@@ -115,7 +111,7 @@ public class FetchMovieData extends AsyncTask<String, Void, List<Movie>> {
 
         try
         {
-            return GetMovieDataFromJson(movieJsonStr,params[0]);
+             GetMovieDataFromJson(movieJsonStr,params[0]);
         } catch (JSONException e) {
             e.printStackTrace();
             Log.i("Error", e.getMessage());
@@ -125,17 +121,7 @@ public class FetchMovieData extends AsyncTask<String, Void, List<Movie>> {
         return null;
     }
 
-    @Override
-    protected void onPostExecute(List<Movie> result) {
-        if (result != null) {
-            //clear adapter then add new data then notify data changed
-            MoviesListFragment.sMovieAdapter.clear();
-            MoviesListFragment.sMovieAdapter.addAll(result);
-            MoviesListFragment.sMovieAdapter.notifyDataSetChanged();
-        }
-    }
-
-    private List<Movie> GetMovieDataFromJson(String movieJsonStr, String sortBy) throws JSONException {
+    private void GetMovieDataFromJson(String movieJsonStr, String sortBy) throws JSONException {
 
         // These are the names of the JSON objects that need to be extracted.
         final String Array_RESULT = "results";
@@ -171,11 +157,11 @@ public class FetchMovieData extends AsyncTask<String, Void, List<Movie>> {
         }
 
         // build uri to get cursor with Sort by
-        Uri moviesBySort = MoviesContract.MoviesEntry.buildMoviesUriWithSortBy(sortBy);
+        Uri moviesUriBySort = MoviesContract.MoviesEntry.buildMoviesUriWithSortBy(sortBy);
 
         int deleted = 0;
         //delete data from database which have same sort by
-        deleted = mContext.getContentResolver().delete(moviesBySort,null,null);
+        deleted = mContext.getContentResolver().delete(moviesUriBySort,null,null);
         Log.d("Row Deleted ",String.valueOf(deleted));
 
         int inserted = 0;
@@ -187,28 +173,6 @@ public class FetchMovieData extends AsyncTask<String, Void, List<Movie>> {
         }
         Log.d("Row Inserted ",String.valueOf(inserted));
 
-        Cursor cur = mContext.getContentResolver().query(moviesBySort, null, null, null, null);
-
-        //CREATE new array from Movie class to save data on it
-        List<Movie> movieResult = new ArrayList<Movie>();
-
-        if ( cur.moveToFirst() ) {
-            do {
-                ContentValues cv = new ContentValues();
-                DatabaseUtils.cursorRowToContentValues(cur, cv);
-                //get data from Object and append to movie list
-                movieResult.add(new Movie(
-                        cv.getAsInteger(MoviesContract.MoviesEntry.COLUMN_MOV_ID),
-                        cv.getAsString(MoviesContract.MoviesEntry.COLUMN_MOV_ORIGINAL_TITLE),
-                        cv.getAsString(MoviesContract.MoviesEntry.COLUMN_MOV_RELEASE_DATE),
-                        cv.getAsString(MoviesContract.MoviesEntry.COLUMN_MOV_OVERVIEW),
-                        cv.getAsString(MoviesContract.MoviesEntry.COLUMN_MOV_POSTER_PATH),
-                        cv.getAsDouble(MoviesContract.MoviesEntry.COLUMN_MOV_VOTE_AVERAGE)
-                ));
-            } while (cur.moveToNext());
-        }
-
-        return movieResult;
     }
 
 }

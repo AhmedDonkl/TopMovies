@@ -1,10 +1,13 @@
 package com.example.ahmeddongl.topmovies;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,14 +17,36 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import java.util.ArrayList;
+import com.example.ahmeddongl.topmovies.Data.MoviesContract;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MoviesListFragment extends Fragment {
+public class MoviesListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
 
-    public static MovieAdapter sMovieAdapter;
+    private MovieAdapter mMovieAdapter;
+    private static final int MOVIES_LOADER = 0;
+
+    static final String[] MOVIES_COLUMNS = {
+            MoviesContract.MoviesEntry.TABLE_NAME + "." + MoviesContract.MoviesEntry._ID,
+            MoviesContract.MoviesEntry.COLUMN_MOV_ID,
+            MoviesContract.MoviesEntry.COLUMN_MOV_ORIGINAL_TITLE,
+            MoviesContract.MoviesEntry.COLUMN_MOV_RELEASE_DATE,
+            MoviesContract.MoviesEntry.COLUMN_MOV_OVERVIEW,
+            MoviesContract.MoviesEntry.COLUMN_MOV_POSTER_PATH,
+            MoviesContract.MoviesEntry.COLUMN_MOV_VOTE_AVERAGE,
+            MoviesContract.MoviesEntry.COLUMN_MOV_SORT_BY
+    };
+
+    // These indices are tied to MOVIES_COLUMNS.  If MOVIES_COLUMNS changes, these
+    // must change.
+    static final int COL_MOV_ID = 0;
+    static final int COL_MOV_ORIGINAL_TITLE = 1;
+    static final int COL_MOV_RELEASE_DATE = 2;
+    static final int COL_MOV_OVERVIEW = 3;
+    static final int COL_MOV_POSTER_PATH = 4;
+    static final int COL_MOV_VOTE_AVERAGE = 5;
+    static final int COL_MOV_SORT_BY = 6;
 
     public MoviesListFragment() {
     }
@@ -31,30 +56,65 @@ public class MoviesListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies_list, container, false);
 
-        // Set our Adapter.
-        sMovieAdapter =
-                new MovieAdapter(
-                        getActivity(), // The current context (this activity)
-                        R.layout.movie_item, // The name of the layout ID.
-                        new ArrayList<Movie>()//empty array list
-                );
+        // Initialize our Adapter.
+        mMovieAdapter = new MovieAdapter(getActivity(), null, 0);
 
         // Get a reference to the GridView, and attach this adapter to it.
         GridView gridView = (GridView)rootView.findViewById(R.id.movie_grid);
-        gridView.setAdapter(sMovieAdapter);
+        gridView.setAdapter(mMovieAdapter);
 
-        //click listener on grid
+        // On click on item listener
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                //pass the clicked item object
-                Intent intent = new Intent(getActivity(), MovieDetail.class)
-                        .putExtra(Intent.EXTRA_TEXT, sMovieAdapter.mMovieItems.get(position));
-                startActivity(intent);
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                // CursorAdapter returns a cursor at the correct position for getItem(), or null
+                // if it cannot seek to that position.
+                Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
+                if (cursor != null) {
+                    Intent intent = new Intent(getActivity(), MovieDetail.class)
+                            .setData(MoviesContract.MoviesEntry.buildMoviesUriWithMovieId(
+                                     cursor.getDouble(COL_MOV_ID)
+                            ));
+                    startActivity(intent);
+                }
             }
         });
 
         return rootView;
     }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        getLoaderManager().initLoader(MOVIES_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        String sortBy =Utility.getPreferredSortBy(getActivity());
+
+        // build uri to get cursor with Sort by
+        Uri moviesUriBySort = MoviesContract.MoviesEntry.buildMoviesUriWithSortBy(sortBy);
+
+        return new CursorLoader(getActivity(),
+                moviesUriBySort,
+                MOVIES_COLUMNS,
+                null,
+                null,
+                null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        mMovieAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        mMovieAdapter.swapCursor(null);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,9 +153,7 @@ public class MoviesListFragment extends Fragment {
 
     public  void updateMovies() {
         FetchMovieData movieTask = new FetchMovieData(getActivity());
-       SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String sortBy = prefs.getString(getString(R.string.pref_sort_key),
-                getString(R.string.pref_sort_default));
+        String sortBy = Utility.getPreferredSortBy(getActivity());
         movieTask.execute(sortBy);
     }
 

@@ -22,6 +22,11 @@
             android:name=".MoviesList"
             android:label="@string/title_activity_movies_list" >
         </activity>
+
+        <provider
+            android:name=".Data.MoviesProvider"
+            android:authorities="com.example.ahmeddongl.topmovies" />
+
         <activity
             android:name=".MovieDetail"
             android:label="@string/title_activity_movie_detail"
@@ -30,17 +35,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.ahmeddongl.topmovies.MoviesList" />
         </activity>
-        <activity
-            android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName=".MovieDetail" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.ahmeddongl.topmovies.MoviesList" />
-        </activity>
-        <provider
-                android:authorities="com.example.ahmeddongl.topmovies"
-                android:name=".Data.MoviesProvider" />
     </application>
 
 </manifest>

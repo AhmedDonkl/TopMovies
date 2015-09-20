@@ -4,10 +4,12 @@
     android:layout_height="match_parent">
 
     <ListPreference
+        android:dialogTitle="Get Movies On"
         android:title="@string/pref_sort_label"
         android:key="@string/pref_sort_key"
         android:defaultValue="@string/pref_sort_label_most_popular"
         android:entryValues="@array/pref_sort_values"
-        android:entries="@array/pref_sort_options" />
+        android:entries="@array/pref_sort_options"
+        />
 
 </PreferenceScreen>

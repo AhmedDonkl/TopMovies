@@ -81,13 +81,12 @@ public class MovieDetail extends ActionBarActivity {
                 if (intent == null) {
                     return null;
                 }
-
                 // Now create and return a CursorLoader that will take care of
                 // creating a Cursor for the data being displayed.
                 return new CursorLoader(
                         getActivity(),
                         intent.getData(),
-                        MoviesListFragment.MOVIES_COLUMNS,
+                        null,
                         null,
                         null,
                         null

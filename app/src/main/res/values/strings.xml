@@ -15,9 +15,9 @@
     <!-- Default Sort type preference [CHAR LIMIT=NONE] -->
     <string name="pref_sort_default" translatable="false">popularity.desc</string>
     <!-- Label for most popular option in sort preference [CHAR LIMIT=25] -->
-    <string name="pref_sort_label_most_popular">most popular</string>
+    <string name="pref_sort_label_most_popular">Most Popular</string>
     <!-- Label for highest-rated option in sort preference [CHAR LIMIT=25] -->
-    <string name="pref_sort_label_highest_rated">highest rated</string>
+    <string name="pref_sort_label_highest_rated">Highest Rated</string>
     <!-- Value in SharedPreferences for most popular option [CHAR LIMIT=NONE] -->
     <string name="pref_sort_most_popular" translatable="false">popularity.desc</string>
     <!-- Value in SharedPreferences for highest rated option [CHAR LIMIT=NONE] -->

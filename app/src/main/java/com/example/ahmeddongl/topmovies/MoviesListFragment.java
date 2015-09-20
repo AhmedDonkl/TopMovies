@@ -27,26 +27,15 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     private MovieAdapter mMovieAdapter;
     private static final int MOVIES_LOADER = 0;
 
-    static final String[] MOVIES_COLUMNS = {
-            MoviesContract.MoviesEntry.TABLE_NAME + "." + MoviesContract.MoviesEntry._ID,
-            MoviesContract.MoviesEntry.COLUMN_MOV_ID,
-            MoviesContract.MoviesEntry.COLUMN_MOV_ORIGINAL_TITLE,
-            MoviesContract.MoviesEntry.COLUMN_MOV_RELEASE_DATE,
-            MoviesContract.MoviesEntry.COLUMN_MOV_OVERVIEW,
-            MoviesContract.MoviesEntry.COLUMN_MOV_POSTER_PATH,
-            MoviesContract.MoviesEntry.COLUMN_MOV_VOTE_AVERAGE,
-            MoviesContract.MoviesEntry.COLUMN_MOV_SORT_BY
-    };
-
     // These indices are tied to MOVIES_COLUMNS.  If MOVIES_COLUMNS changes, these
     // must change.
-    static final int COL_MOV_ID = 0;
-    static final int COL_MOV_ORIGINAL_TITLE = 1;
-    static final int COL_MOV_RELEASE_DATE = 2;
-    static final int COL_MOV_OVERVIEW = 3;
-    static final int COL_MOV_POSTER_PATH = 4;
-    static final int COL_MOV_VOTE_AVERAGE = 5;
-    static final int COL_MOV_SORT_BY = 6;
+    static final int COL_MOV_ID = 1;
+    static final int COL_MOV_ORIGINAL_TITLE = 2;
+    static final int COL_MOV_RELEASE_DATE = 3;
+    static final int COL_MOV_OVERVIEW = 4;
+    static final int COL_MOV_POSTER_PATH = 5;
+    static final int COL_MOV_VOTE_AVERAGE = 6;
+    static final int COL_MOV_SORT_BY = 7;
 
     public MoviesListFragment() {
     }
@@ -72,10 +61,21 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
                 // if it cannot seek to that position.
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
                 if (cursor != null) {
-                    Intent intent = new Intent(getActivity(), MovieDetail.class)
-                            .setData(MoviesContract.MoviesEntry.buildMoviesUriWithMovieId(
-                                     cursor.getDouble(COL_MOV_ID)
-                            ));
+                    Intent intent;
+                    String sortBy = Utility.getPreferredSortBy(getActivity());
+                    //check about sort by to get correct uri
+                    if(sortBy.equals("popularity.desc")) {
+                        intent=new Intent(getActivity(), MovieDetail.class)
+                                .setData(MoviesContract.MostPopularEntry.buildPopularMoviesUriWithMovieId(
+                                        cursor.getLong(COL_MOV_ID)
+                                ));
+                    }
+                    else{
+                        intent=new Intent(getActivity(), MovieDetail.class)
+                                .setData(MoviesContract.HighestRatedEntry.buildHighestMoviesUriWithMovieId(
+                                        cursor.getLong(COL_MOV_ID)
+                                ));
+                    }
                     startActivity(intent);
                 }
             }
@@ -95,11 +95,17 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
         String sortBy =Utility.getPreferredSortBy(getActivity());
 
         // build uri to get cursor with Sort by
-        Uri moviesUriBySort = MoviesContract.MoviesEntry.buildMoviesUriWithSortBy(sortBy);
+        Uri moviesUriBySort;
+        if(sortBy.equals("popularity.desc")) {
+            moviesUriBySort = MoviesContract.MostPopularEntry.CONTENT_URI;
+        }
+        else{
+            moviesUriBySort = MoviesContract.HighestRatedEntry.CONTENT_URI;
+        }
 
         return new CursorLoader(getActivity(),
                 moviesUriBySort,
-                MOVIES_COLUMNS,
+                null,
                 null,
                 null,
                 null);
@@ -145,13 +151,13 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
+    // since we read sort by when we create the loader, all we need to do is restart things
+    void onSortByChanged( ) {
         updateMovies();
+        getLoaderManager().restartLoader(MOVIES_LOADER, null, this);
     }
 
-    public  void updateMovies() {
+    public void updateMovies() {
         FetchMovieData movieTask = new FetchMovieData(getActivity());
         String sortBy = Utility.getPreferredSortBy(getActivity());
         movieTask.execute(sortBy);

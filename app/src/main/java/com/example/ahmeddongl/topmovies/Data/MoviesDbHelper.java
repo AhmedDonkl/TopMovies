@@ -24,17 +24,27 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        final String SQL_CREATE_WEATHER_TABLE = "CREATE TABLE " + MoviesContract.MoviesEntry.TABLE_NAME + " (" +
-                MoviesContract.MoviesEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                MoviesContract.MoviesEntry.COLUMN_MOV_ID + " DOUBLE NOT NULL, " +
-                MoviesContract.MoviesEntry.COLUMN_MOV_ORIGINAL_TITLE + " TEXT NOT NULL, " +
-                MoviesContract.MoviesEntry.COLUMN_MOV_RELEASE_DATE + " TEXT NOT NULL, " +
-                MoviesContract.MoviesEntry.COLUMN_MOV_OVERVIEW + " TEXT NOT NULL," +
-                MoviesContract.MoviesEntry.COLUMN_MOV_POSTER_PATH + " TEXT NOT NULL, " +
-                MoviesContract.MoviesEntry.COLUMN_MOV_VOTE_AVERAGE + " DOUBLE NOT NULL, " +
-                MoviesContract.MoviesEntry.COLUMN_MOV_SORT_BY + " TEXT NOT NULL);";
+        final String SQL_CREATE_MOST_POPULAR_TABLE = "CREATE TABLE " + MoviesContract.MostPopularEntry.TABLE_NAME + " (" +
+                MoviesContract.MostPopularEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                MoviesContract.COLUMN_MOV_ID + " LONG NOT NULL, " +
+                MoviesContract.COLUMN_MOV_ORIGINAL_TITLE + " TEXT NOT NULL, " +
+                MoviesContract.COLUMN_MOV_RELEASE_DATE + " TEXT NOT NULL, " +
+                MoviesContract.COLUMN_MOV_OVERVIEW + " TEXT NOT NULL," +
+                MoviesContract.COLUMN_MOV_POSTER_PATH + " TEXT NOT NULL, " +
+                MoviesContract.COLUMN_MOV_VOTE_AVERAGE + " DOUBLE NOT NULL);";
 
-        sqLiteDatabase.execSQL(SQL_CREATE_WEATHER_TABLE);
+        final String SQL_CREATE_HIGHEST_RATED_TABLE = "CREATE TABLE " + MoviesContract.HighestRatedEntry.TABLE_NAME + " (" +
+                MoviesContract.HighestRatedEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                MoviesContract.COLUMN_MOV_ID + " LONG NOT NULL, " +
+                MoviesContract.COLUMN_MOV_ORIGINAL_TITLE + " TEXT NOT NULL, " +
+                MoviesContract.COLUMN_MOV_RELEASE_DATE + " TEXT NOT NULL, " +
+                MoviesContract.COLUMN_MOV_OVERVIEW + " TEXT NOT NULL," +
+                MoviesContract.COLUMN_MOV_POSTER_PATH + " TEXT NOT NULL, " +
+                MoviesContract.COLUMN_MOV_VOTE_AVERAGE + " DOUBLE NOT NULL);";
+
+
+        sqLiteDatabase.execSQL(SQL_CREATE_MOST_POPULAR_TABLE);
+        sqLiteDatabase.execSQL(SQL_CREATE_HIGHEST_RATED_TABLE);
     }
 
     @Override
@@ -45,7 +55,8 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
         // It does NOT depend on the version number for your application.
         // If you want to update the schema without wiping data, commenting out the next 2 lines
         // should be your top priority before modifying this method.
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.MoviesEntry.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.MostPopularEntry.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.HighestRatedEntry.TABLE_NAME);
         onCreate(sqLiteDatabase);
     }
 }

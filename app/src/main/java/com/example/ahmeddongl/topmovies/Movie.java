@@ -6,14 +6,14 @@ package com.example.ahmeddongl.topmovies;
 /*This Class will represent a Movie*/
 public class Movie {
 
-     int mId;
+     Long mId;
      String mOriginalTitle;
      String mReleaseDate;
      String mOverview;
      String mPosterPath;
      double mVoteAverage;
 
-    public Movie(int mId,String mOriginalTitle,String mReleaseDate,String mOverview,String mPosterPath,double mVoteAverage) {
+    public Movie(Long mId,String mOriginalTitle,String mReleaseDate,String mOverview,String mPosterPath,double mVoteAverage) {
 
         this.mId=mId;
         this.mOriginalTitle=mOriginalTitle;

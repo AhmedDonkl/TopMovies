@@ -50,7 +50,7 @@ public class FetchMovieData extends AsyncTask<String, Void, Void> {
                     "http://api.themoviedb.org/3/discover/movie?";
             final String SORT_PARAM = "sort_by";
             final String API_PARAM = "api_key";
-            final String API_KEY = "";
+            final String API_KEY = "b821c2f9d27847f2406a800b7a3afe84";
 
             //Url of json file no need to uri builder
             Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
@@ -145,33 +145,53 @@ public class FetchMovieData extends AsyncTask<String, Void, Void> {
             //get data from Object and append to content Values Vector
             ContentValues weatherValues = new ContentValues();
 
-            weatherValues.put(MoviesContract.MoviesEntry.COLUMN_MOV_ID, movieObject.getInt(MOVIE_ID));
-            weatherValues.put(MoviesContract.MoviesEntry.COLUMN_MOV_ORIGINAL_TITLE, movieObject.getString(MOVIE_ORIGINAL_TITLE));
-            weatherValues.put(MoviesContract.MoviesEntry.COLUMN_MOV_RELEASE_DATE, movieObject.getString(MOVIE_RELEASE_DATE));
-            weatherValues.put(MoviesContract.MoviesEntry.COLUMN_MOV_OVERVIEW, movieObject.getString(MOVIE_OVERVIEW));
-            weatherValues.put(MoviesContract.MoviesEntry.COLUMN_MOV_POSTER_PATH, movieObject.getString(MOVIE_POSTER_PATH));
-            weatherValues.put(MoviesContract.MoviesEntry.COLUMN_MOV_VOTE_AVERAGE, movieObject.getDouble(MOVIE_VOTE_AVERAGE));
-            weatherValues.put(MoviesContract.MoviesEntry.COLUMN_MOV_SORT_BY, sortBy);
+            weatherValues.put(MoviesContract.COLUMN_MOV_ID, movieObject.getLong(MOVIE_ID));
+            weatherValues.put(MoviesContract.COLUMN_MOV_ORIGINAL_TITLE, movieObject.getString(MOVIE_ORIGINAL_TITLE));
+            weatherValues.put(MoviesContract.COLUMN_MOV_RELEASE_DATE, movieObject.getString(MOVIE_RELEASE_DATE));
+            weatherValues.put(MoviesContract.COLUMN_MOV_OVERVIEW, movieObject.getString(MOVIE_OVERVIEW));
+            weatherValues.put(MoviesContract.COLUMN_MOV_POSTER_PATH, movieObject.getString(MOVIE_POSTER_PATH));
+            weatherValues.put(MoviesContract.COLUMN_MOV_VOTE_AVERAGE, movieObject.getDouble(MOVIE_VOTE_AVERAGE));
 
             cVVector.add(weatherValues);
         }
 
-        // build uri to get cursor with Sort by
-        Uri moviesUriBySort = MoviesContract.MoviesEntry.buildMoviesUriWithSortBy(sortBy);
+        //check if data sorted by most popular or highest rate
+        if(sortBy.equals("popularity.desc")){
+            // build uri to delete popular table data
+            Uri popularMoviesUri = MoviesContract.MostPopularEntry.CONTENT_URI;
 
-        int deleted = 0;
-        //delete data from database which have same sort by
-        deleted = mContext.getContentResolver().delete(moviesUriBySort,null,null);
-        Log.d("Row Deleted ",String.valueOf(deleted));
+            int deleted = 0;
+            //delete data from database
+            deleted = mContext.getContentResolver().delete(popularMoviesUri,null,null);
+            Log.d("Row Deleted ",String.valueOf(deleted));
 
-        int inserted = 0;
-        // add to database
-        if ( cVVector.size() > 0 ) {
-            ContentValues[] cvArray = new ContentValues[cVVector.size()];
-            cVVector.toArray(cvArray);
-            inserted = mContext.getContentResolver().bulkInsert(MoviesContract.MoviesEntry.CONTENT_URI, cvArray);
+            int inserted = 0;
+            // add to database
+            if ( cVVector.size() > 0 ) {
+                ContentValues[] cvArray = new ContentValues[cVVector.size()];
+                cVVector.toArray(cvArray);
+                inserted = mContext.getContentResolver().bulkInsert(popularMoviesUri, cvArray);
+            }
+            Log.d("Row Inserted ",String.valueOf(inserted));
         }
-        Log.d("Row Inserted ",String.valueOf(inserted));
+        else{
+            // build uri to delete popular table data
+            Uri HighestMoviesUri = MoviesContract.HighestRatedEntry.CONTENT_URI;
+
+            int deleted = 0;
+            //delete data from database
+            deleted = mContext.getContentResolver().delete(HighestMoviesUri,null,null);
+            Log.d("Row Deleted ",String.valueOf(deleted));
+
+            int inserted = 0;
+            // add to database
+            if ( cVVector.size() > 0 ) {
+                ContentValues[] cvArray = new ContentValues[cVVector.size()];
+                cVVector.toArray(cvArray);
+                inserted = mContext.getContentResolver().bulkInsert(HighestMoviesUri, cvArray);
+            }
+            Log.d("Row Inserted ",String.valueOf(inserted));
+        }
 
     }
 

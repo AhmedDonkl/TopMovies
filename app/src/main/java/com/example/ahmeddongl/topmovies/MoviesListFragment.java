@@ -37,6 +37,18 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     static final int COL_MOV_VOTE_AVERAGE = 6;
     static final int COL_MOV_SORT_BY = 7;
 
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        public void onItemSelected(Uri idUri);
+    }
+
     public MoviesListFragment() {
     }
 
@@ -61,22 +73,20 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
                 // if it cannot seek to that position.
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
                 if (cursor != null) {
-                    Intent intent;
                     String sortBy = Utility.getPreferredSortBy(getActivity());
                     //check about sort by to get correct uri
                     if(sortBy.equals("popularity.desc")) {
-                        intent=new Intent(getActivity(), MovieDetail.class)
-                                .setData(MoviesContract.MostPopularEntry.buildPopularMoviesUriWithMovieId(
+                        ((Callback) getActivity())
+                                .onItemSelected(MoviesContract.MostPopularEntry.buildPopularMoviesUriWithMovieId(
                                         cursor.getLong(COL_MOV_ID)
                                 ));
                     }
                     else{
-                        intent=new Intent(getActivity(), MovieDetail.class)
-                                .setData(MoviesContract.HighestRatedEntry.buildHighestMoviesUriWithMovieId(
+                        ((Callback) getActivity())
+                                .onItemSelected(MoviesContract.HighestRatedEntry.buildHighestMoviesUriWithMovieId(
                                         cursor.getLong(COL_MOV_ID)
                                 ));
                     }
-                    startActivity(intent);
                 }
             }
         });

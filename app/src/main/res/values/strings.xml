@@ -22,5 +22,8 @@
     <string name="pref_sort_most_popular" translatable="false">popularity.desc</string>
     <!-- Value in SharedPreferences for highest rated option [CHAR LIMIT=NONE] -->
     <string name="pref_sort_highest_rated" translatable="false">vote_average.desc</string>
-
+    <!-- Label for favorite option in sort preference [CHAR LIMIT=25] -->
+    <string name="pref_sort_label_favorites">Favorites</string>
+    <!-- Value in SharedPreferences for favorite option [CHAR LIMIT=NONE] -->
+    <string name="pref_sort_favorite" translatable="false">favorite</string>
 </resources>

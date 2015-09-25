@@ -143,16 +143,16 @@ public class FetchMovieData extends AsyncTask<String, Void, Void> {
             JSONObject movieObject = movieArray.getJSONObject(i);
 
             //get data from Object and append to content Values Vector
-            ContentValues weatherValues = new ContentValues();
+            ContentValues moviesValues = new ContentValues();
 
-            weatherValues.put(MoviesContract.COLUMN_MOV_ID, movieObject.getLong(MOVIE_ID));
-            weatherValues.put(MoviesContract.COLUMN_MOV_ORIGINAL_TITLE, movieObject.getString(MOVIE_ORIGINAL_TITLE));
-            weatherValues.put(MoviesContract.COLUMN_MOV_RELEASE_DATE, movieObject.getString(MOVIE_RELEASE_DATE));
-            weatherValues.put(MoviesContract.COLUMN_MOV_OVERVIEW, movieObject.getString(MOVIE_OVERVIEW));
-            weatherValues.put(MoviesContract.COLUMN_MOV_POSTER_PATH, movieObject.getString(MOVIE_POSTER_PATH));
-            weatherValues.put(MoviesContract.COLUMN_MOV_VOTE_AVERAGE, movieObject.getDouble(MOVIE_VOTE_AVERAGE));
+            moviesValues.put(MoviesContract.COLUMN_MOV_ID, movieObject.getLong(MOVIE_ID));
+            moviesValues.put(MoviesContract.COLUMN_MOV_ORIGINAL_TITLE, movieObject.getString(MOVIE_ORIGINAL_TITLE));
+            moviesValues.put(MoviesContract.COLUMN_MOV_RELEASE_DATE, movieObject.getString(MOVIE_RELEASE_DATE));
+            moviesValues.put(MoviesContract.COLUMN_MOV_OVERVIEW, movieObject.getString(MOVIE_OVERVIEW));
+            moviesValues.put(MoviesContract.COLUMN_MOV_POSTER_PATH, movieObject.getString(MOVIE_POSTER_PATH));
+            moviesValues.put(MoviesContract.COLUMN_MOV_VOTE_AVERAGE, movieObject.getDouble(MOVIE_VOTE_AVERAGE));
 
-            cVVector.add(weatherValues);
+            cVVector.add(moviesValues);
         }
 
         //check if data sorted by most popular or highest rate

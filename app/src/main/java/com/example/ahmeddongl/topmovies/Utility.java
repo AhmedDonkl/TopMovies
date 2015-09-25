@@ -35,4 +35,17 @@ public class Utility {
         );
     }
 
+    public static ContentValues convertMovieObjectToContentValue(Movie movie) {
+        ContentValues moviesValues = new ContentValues();
+
+        moviesValues.put(MoviesContract.COLUMN_MOV_ID, movie.mId);
+        moviesValues.put(MoviesContract.COLUMN_MOV_ORIGINAL_TITLE,movie.mOriginalTitle );
+        moviesValues.put(MoviesContract.COLUMN_MOV_RELEASE_DATE, movie.mReleaseDate);
+        moviesValues.put(MoviesContract.COLUMN_MOV_OVERVIEW, movie.mOverview);
+        moviesValues.put(MoviesContract.COLUMN_MOV_POSTER_PATH,movie.mPosterPath);
+        moviesValues.put(MoviesContract.COLUMN_MOV_VOTE_AVERAGE, movie.mVoteAverage);
+
+        return moviesValues;
+    }
+
 }

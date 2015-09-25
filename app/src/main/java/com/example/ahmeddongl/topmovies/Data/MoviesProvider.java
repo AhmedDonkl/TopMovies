@@ -21,6 +21,8 @@ public class MoviesProvider extends ContentProvider {
     static final int HIGHEST_RATED_WITH_MOVIE_ID = 102;
     static final int MOST_POPULAR = 103;
     static final int MOST_POPULAR_WITH_MOVIE_ID = 104;
+    static final int FAVORITES = 105;
+    static final int FAVORITES_WITH_MOVIE_ID = 106;
 
     //Movies.movies_id = ?
     private static final String sMoviesIDSelection =
@@ -37,6 +39,8 @@ public class MoviesProvider extends ContentProvider {
         matcher.addURI(authority, MoviesContract.PATH_MOST_POPULAR  + "/#", MOST_POPULAR_WITH_MOVIE_ID);
         matcher.addURI(authority, MoviesContract.PATH_HIGHEST_RATED, HIGHEST_RATED);
         matcher.addURI(authority, MoviesContract.PATH_HIGHEST_RATED  + "/#", HIGHEST_RATED_WITH_MOVIE_ID);
+        matcher.addURI(authority, MoviesContract.PATH_FAVORITES, FAVORITES);
+        matcher.addURI(authority, MoviesContract.PATH_FAVORITES  + "/#", FAVORITES_WITH_MOVIE_ID);
         return matcher;
     }
 
@@ -68,6 +72,20 @@ public class MoviesProvider extends ContentProvider {
         );
     }
 
+    private Cursor getFavoriteMoviesWithMovieId(Uri uri, String[] projection, String sortOrder) {
+        String id = uri.getPathSegments().get(1);
+
+        return mOpenHelper.getReadableDatabase().query(
+                MoviesContract.FavoriteEntry.TABLE_NAME,
+                projection,
+                sMoviesIDSelection,
+                new String[]{id},
+                null,
+                null,
+                sortOrder
+        );
+    }
+
     @Override
     public boolean onCreate() {
         mOpenHelper = new MoviesDbHelper(getContext());
@@ -87,6 +105,10 @@ public class MoviesProvider extends ContentProvider {
             case HIGHEST_RATED:
                 return MoviesContract.HighestRatedEntry.CONTENT_TYPE;
             case HIGHEST_RATED_WITH_MOVIE_ID:
+                return MoviesContract.HighestRatedEntry.CONTENT_ITEM_TYPE;
+            case FAVORITES:
+                return MoviesContract.HighestRatedEntry.CONTENT_TYPE;
+            case FAVORITES_WITH_MOVIE_ID:
                 return MoviesContract.HighestRatedEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -128,6 +150,20 @@ public class MoviesProvider extends ContentProvider {
             case HIGHEST_RATED_WITH_MOVIE_ID:
                 retCursor = getHighestMoviesWithMovieId(uri, projection, sortOrder);
                 break;
+            case FAVORITES:
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        MoviesContract.FavoriteEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+            case FAVORITES_WITH_MOVIE_ID:
+                retCursor = getFavoriteMoviesWithMovieId(uri, projection, sortOrder);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -156,6 +192,13 @@ public class MoviesProvider extends ContentProvider {
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
             break;
+            case FAVORITES:
+                _id = db.insert(MoviesContract.FavoriteEntry.TABLE_NAME, null, values);
+                if ( _id > 0 )
+                    returnUri = MoviesContract.FavoriteEntry.buildFavoriteMoviesUriWithMovieId(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -179,6 +222,15 @@ public class MoviesProvider extends ContentProvider {
             case HIGHEST_RATED:
                 rowsDeleted = db.delete(
                         MoviesContract.HighestRatedEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            case FAVORITES:
+                rowsDeleted = db.delete(
+                        MoviesContract.FavoriteEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            case FAVORITES_WITH_MOVIE_ID:
+                String id = uri.getPathSegments().get(1);
+                rowsDeleted = db.delete(
+                        MoviesContract.FavoriteEntry.TABLE_NAME, sMoviesIDSelection,   new String[]{id});
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

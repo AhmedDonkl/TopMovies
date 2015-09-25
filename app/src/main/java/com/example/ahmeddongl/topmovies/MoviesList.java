@@ -30,6 +30,7 @@ public class MoviesList extends ActionBarActivity implements MoviesListFragment.
             }
         } else {
             mTwoPane = false;
+            getSupportActionBar().setElevation(0f);
         }
         mSortBy =  Utility.getPreferredSortBy(this);
     }

@@ -40,7 +40,7 @@
             android:text="2015"
             android:textSize="25sp"
             />
-        <TextView
+        <RatingBar
             android:id="@+id/detailMovieRate"
             android:layout_marginTop="5dp"
             android:layout_below="@+id/detailMovieReleaseDate"
@@ -48,8 +48,10 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/detailMovieImage"
             android:layout_marginLeft="30dp"
-            android:text="8.1/10"
-            android:textSize="18sp"
+            style="?android:attr/ratingBarStyleSmall"
+            android:numStars="5"
+            android:stepSize="0.1"
+            android:isIndicator="true"
             />
 
         <TextView
@@ -64,6 +66,17 @@
             android:textSize="18sp"
             />
 
+        <ImageButton
+            android:layout_toRightOf="@+id/detailMovieImage"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/favorite"
+            android:layout_marginRight="20dp"
+            android:layout_below="@+id/detailMovieRate"
+            android:src="@drawable/favorite_blank_pi"
+            />
     </RelativeLayout>
 
 </ScrollView>

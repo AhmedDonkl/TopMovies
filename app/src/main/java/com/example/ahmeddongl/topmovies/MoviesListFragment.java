@@ -27,6 +27,11 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     private MovieAdapter mMovieAdapter;
     private static final int MOVIES_LOADER = 0;
 
+    //restore scroll position
+    private GridView mGridView;
+    private int mPosition = GridView.INVALID_POSITION;
+    private static final String SELECTED_KEY = "selected_position";
+
     // These indices are tied to MOVIES_COLUMNS.  If MOVIES_COLUMNS changes, these
     // must change.
     static final int COL_MOV_ID = 1;
@@ -61,11 +66,11 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
         mMovieAdapter = new MovieAdapter(getActivity(), null, 0);
 
         // Get a reference to the GridView, and attach this adapter to it.
-        GridView gridView = (GridView)rootView.findViewById(R.id.movie_grid);
-        gridView.setAdapter(mMovieAdapter);
+        mGridView = (GridView)rootView.findViewById(R.id.movie_grid);
+        mGridView.setAdapter(mMovieAdapter);
 
         // On click on item listener
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -81,9 +86,15 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
                                         cursor.getLong(COL_MOV_ID)
                                 ));
                     }
-                    else{
+                    else if(sortBy.equals("vote_average.desc")){
                         ((Callback) getActivity())
                                 .onItemSelected(MoviesContract.HighestRatedEntry.buildHighestMoviesUriWithMovieId(
+                                        cursor.getLong(COL_MOV_ID)
+                                ));
+                    }
+                    else{
+                        ((Callback) getActivity())
+                                .onItemSelected(MoviesContract.FavoriteEntry.buildFavoriteMoviesUriWithMovieId(
                                         cursor.getLong(COL_MOV_ID)
                                 ));
                     }
@@ -91,7 +102,23 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
             }
         });
 
+        //get position from bundle
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
+            mPosition = savedInstanceState.getInt(SELECTED_KEY);
+        }
+
         return rootView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        // When tablets rotate, the currently selected list item needs to be saved.
+        // When no item is selected, mPosition will be set to GridView.INVALID_POSITION,
+        // so check for that before storing.
+        if (mPosition != GridView.INVALID_POSITION) {
+            outState.putInt(SELECTED_KEY, mPosition);
+        }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -109,8 +136,11 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
         if(sortBy.equals("popularity.desc")) {
             moviesUriBySort = MoviesContract.MostPopularEntry.CONTENT_URI;
         }
-        else{
+        else if(sortBy.equals("vote_average.desc")){
             moviesUriBySort = MoviesContract.HighestRatedEntry.CONTENT_URI;
+        }
+        else{
+            moviesUriBySort = MoviesContract.FavoriteEntry.CONTENT_URI;
         }
 
         return new CursorLoader(getActivity(),
@@ -124,6 +154,12 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         mMovieAdapter.swapCursor(cursor);
+
+        if (mPosition != GridView.INVALID_POSITION) {
+            // If we don't need to restart the loader, and there's a desired position to restore
+            // to, do so now.
+            mGridView.smoothScrollToPosition(mPosition);
+        }
     }
 
     @Override

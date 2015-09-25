@@ -20,7 +20,8 @@
         </activity>
         <activity
             android:name=".MoviesList"
-            android:label="@string/title_activity_movies_list" >
+            android:label="@string/title_activity_movies_list"
+            android:theme="@style/MoviesTheme">
         </activity>
 
         <provider
@@ -33,7 +34,7 @@
             android:parentActivityName=".MoviesList" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.ahmeddongl.topmovies.MoviesList" />
+                android:value=".MoviesList" />
         </activity>
         <activity
             android:name=".SettingsActivity"
@@ -41,7 +42,7 @@
             android:parentActivityName=".MovieDetail" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.ahmeddongl.topmovies.MoviesList" />
+                android:value=".MoviesList" />
         </activity>
     </application>
 

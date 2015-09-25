@@ -59,7 +59,6 @@ public class MovieAdapter extends CursorAdapter {
         holder.mMovieText.setText(movieItem.mOriginalTitle);
         //load image with picasso and append base path url
         Picasso.with(context).load("http://image.tmdb.org/t/p/w185"+movieItem.mPosterPath).into(holder.mMoviePicture);
-
     }
 
 }

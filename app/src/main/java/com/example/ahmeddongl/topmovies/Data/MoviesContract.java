@@ -27,6 +27,7 @@ public class MoviesContract {
     // Possible paths (appended to base content URI for possible URI's)
     public static final String PATH_MOST_POPULAR = "mostPopular";
     public static final String PATH_HIGHEST_RATED= "highestRated";
+    public static final String PATH_FAVORITES= "favorite";
 
     /* Tables Common Column */
     // Column with the id of the movie.
@@ -83,6 +84,29 @@ public class MoviesContract {
         }
 
         public static Uri buildHighestMoviesUriWithMovieId(Long movieId) {
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(movieId)).build();
+        }
+
+    }
+
+    /* Inner class that defines the table contents of the Favorite table */
+    public static final class FavoriteEntry implements BaseColumns {
+
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_FAVORITES).build();
+
+        public static final String CONTENT_TYPE =
+                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_FAVORITES;
+        public static final String CONTENT_ITEM_TYPE =
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_FAVORITES;
+
+        public static final String TABLE_NAME = "favorite";
+
+        public static Uri buildFavoriteMovieUriWithID(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public static Uri buildFavoriteMoviesUriWithMovieId(Long movieId) {
             return CONTENT_URI.buildUpon().appendPath(String.valueOf(movieId)).build();
         }
 

@@ -42,9 +42,18 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
                 MoviesContract.COLUMN_MOV_POSTER_PATH + " TEXT NOT NULL, " +
                 MoviesContract.COLUMN_MOV_VOTE_AVERAGE + " DOUBLE NOT NULL);";
 
+        final String SQL_CREATE_FAVORITES_TABLE = "CREATE TABLE " + MoviesContract.FavoriteEntry.TABLE_NAME + " (" +
+                MoviesContract.HighestRatedEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                MoviesContract.COLUMN_MOV_ID + " LONG NOT NULL, " +
+                MoviesContract.COLUMN_MOV_ORIGINAL_TITLE + " TEXT NOT NULL, " +
+                MoviesContract.COLUMN_MOV_RELEASE_DATE + " TEXT NOT NULL, " +
+                MoviesContract.COLUMN_MOV_OVERVIEW + " TEXT NOT NULL," +
+                MoviesContract.COLUMN_MOV_POSTER_PATH + " TEXT NOT NULL, " +
+                MoviesContract.COLUMN_MOV_VOTE_AVERAGE + " DOUBLE NOT NULL);";
 
         sqLiteDatabase.execSQL(SQL_CREATE_MOST_POPULAR_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_HIGHEST_RATED_TABLE);
+        sqLiteDatabase.execSQL(SQL_CREATE_FAVORITES_TABLE);
     }
 
     @Override
@@ -57,6 +66,7 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
         // should be your top priority before modifying this method.
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.MostPopularEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.HighestRatedEntry.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.FavoriteEntry.TABLE_NAME);
         onCreate(sqLiteDatabase);
     }
 }

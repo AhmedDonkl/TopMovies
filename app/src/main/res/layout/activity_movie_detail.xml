@@ -3,5 +3,5 @@ xmlns:tools="http://schemas.android.com/tools"
 android:id="@+id/movies_detail_container"
 android:layout_width="match_parent"
 android:layout_height="match_parent"
-tools:context="com.example.ahmeddongl.topmovies.MovieDetail"
+tools:context="com.example.ahmeddongl.topmovies.Controller.MovieDetail"
 tools:ignore="MergeRootFrame" />

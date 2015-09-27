@@ -1,4 +1,4 @@
-package com.example.ahmeddongl.topmovies;
+package com.example.ahmeddongl.topmovies.Controller;
 
 /**
  * Created by Ahmed Donkl on 9/20/2015.
@@ -16,8 +16,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +33,16 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.ahmeddongl.topmovies.Data.MoviesContract;
+import com.example.ahmeddongl.topmovies.Controller.Adapters.ExpandableReviewAdapter;
+import com.example.ahmeddongl.topmovies.Controller.Adapters.ExpandableTrailersAdapter;
+import com.example.ahmeddongl.topmovies.Model.Data.MoviesContract;
+import com.example.ahmeddongl.topmovies.Model.FetchData.FetchReviewData;
+import com.example.ahmeddongl.topmovies.Model.FetchData.FetchTrailerData;
+import com.example.ahmeddongl.topmovies.Model.Movie;
+import com.example.ahmeddongl.topmovies.Model.Review;
+import com.example.ahmeddongl.topmovies.Model.Trailer;
+import com.example.ahmeddongl.topmovies.R;
+import com.example.ahmeddongl.topmovies.Utility;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -57,6 +70,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private ImageButton favoriteButton;
     private ExpandableListView trailersExpandableList;
     private ExpandableListView reviewsExpandableList;
+
+    private static final String Movies_SHARE_HASH_TAG = " #TopMoviesApp";
+    private String mShareStr;
 
     public MovieDetailFragment() {
         setHasOptionsMenu(true);
@@ -182,6 +198,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         final List<Trailer> trailersList = Utility.convertCursorToTrailerList(trailersData);
         ExpandableTrailersAdapter trailersAdapter = new ExpandableTrailersAdapter(getActivity(),trailersList);
 
+        if(trailersList.size() > 0){
+            mShareStr = trailersList.get(0).mLink;
+        }
         trailersExpandableList.setAdapter(trailersAdapter);
         trailersExpandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
@@ -278,22 +297,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(getActivity(),SettingsActivity.class));
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
@@ -343,6 +346,36 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         if (null != uri) {
             getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.detailfragment, menu);
+
+        // Retrieve the share menu item
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+
+        // Get the provider and hold onto it to set/change the share intent.
+        ShareActionProvider mShareActionProvider =
+                (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+        // Attach an intent to this ShareActionProvider.  You can update this at any time,
+        // like when the user selects a new piece of data they might like to share.
+        if (mShareActionProvider != null && mShareStr != null) {
+            mShareActionProvider.setShareIntent(createShareMovieIntent());
+        } else {
+            Log.d(LOG_TAG, "Share Action Provider is null?");
+        }
+    }
+
+    private Intent createShareMovieIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT,
+                "http://www.youtube.com/watch?v="+ mShareStr + Movies_SHARE_HASH_TAG);
+        return shareIntent;
     }
 
     public void updateTrailersAndReviews() {

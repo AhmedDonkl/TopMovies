@@ -1,4 +1,4 @@
-package com.example.ahmeddongl.topmovies;
+package com.example.ahmeddongl.topmovies.Controller;
 
 /**
  * Created by Ahmed Dongl on 3/21/2015.
@@ -12,6 +12,8 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+
+import com.example.ahmeddongl.topmovies.R;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings.

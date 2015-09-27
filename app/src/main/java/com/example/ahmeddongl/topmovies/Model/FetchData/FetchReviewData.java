@@ -1,4 +1,4 @@
-package com.example.ahmeddongl.topmovies;
+package com.example.ahmeddongl.topmovies.Model.FetchData;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,7 +6,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.example.ahmeddongl.topmovies.Data.MoviesContract;
+import com.example.ahmeddongl.topmovies.Model.Data.MoviesContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;

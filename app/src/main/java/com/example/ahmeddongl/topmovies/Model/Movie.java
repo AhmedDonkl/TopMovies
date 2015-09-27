@@ -1,4 +1,4 @@
-package com.example.ahmeddongl.topmovies;
+package com.example.ahmeddongl.topmovies.Model;
 
 /**
  * Created by Ahmed Dongl on 9/3/2015.
@@ -6,12 +6,12 @@ package com.example.ahmeddongl.topmovies;
 /*This Class will represent a Movie*/
 public class Movie {
 
-     Long mId;
-     String mOriginalTitle;
-     String mReleaseDate;
-     String mOverview;
-     String mPosterPath;
-     double mVoteAverage;
+    public Long mId;
+    public String mOriginalTitle;
+    public String mReleaseDate;
+    public String mOverview;
+    public String mPosterPath;
+    public  double mVoteAverage;
 
     public Movie(Long mId,String mOriginalTitle,String mReleaseDate,String mOverview,String mPosterPath,double mVoteAverage) {
 
@@ -22,5 +22,4 @@ public class Movie {
         this.mPosterPath=mPosterPath;
         this.mVoteAverage=mVoteAverage;
     }
-
 }

@@ -1,8 +1,10 @@
-package com.example.ahmeddongl.topmovies;
+package com.example.ahmeddongl.topmovies.Controller;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+
+import com.example.ahmeddongl.topmovies.R;
 
 /*Splash Screen to appear when start app*/
 public class Splash extends Activity {

@@ -1,4 +1,4 @@
-package com.example.ahmeddongl.topmovies.Data;
+package com.example.ahmeddongl.topmovies.Model.Data;
 
 import android.annotation.TargetApi;
 import android.content.ContentProvider;

@@ -1,9 +1,12 @@
-package com.example.ahmeddongl.topmovies;
+package com.example.ahmeddongl.topmovies.Controller;
 
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+
+import com.example.ahmeddongl.topmovies.R;
+import com.example.ahmeddongl.topmovies.Utility;
 
 public class MoviesList extends ActionBarActivity implements MoviesListFragment.Callback {
 

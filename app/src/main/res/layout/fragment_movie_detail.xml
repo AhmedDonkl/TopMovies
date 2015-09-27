@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="#ffffff"
     android:fillViewport="true"
-    tools:context="com.example.ahmeddongl.topmovies.MovieDetail">
+    tools:context="com.example.ahmeddongl.topmovies.Controller.MovieDetail">
 
     <RelativeLayout
         android:layout_width="match_parent"

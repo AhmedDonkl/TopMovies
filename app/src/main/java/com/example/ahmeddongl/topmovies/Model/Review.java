@@ -1,11 +1,11 @@
-package com.example.ahmeddongl.topmovies;
+package com.example.ahmeddongl.topmovies.Model;
 
 /**
  * Created by Ahmed Donkl on 9/26/2015.
  */
 public class Review {
-    String mAuthor;
-    String mContent;
+    public String mAuthor;
+    public String mContent;
 
     public Review(String mAuthor, String mContent) {
         this.mAuthor=mAuthor;

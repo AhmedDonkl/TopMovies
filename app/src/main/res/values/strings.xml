@@ -7,7 +7,7 @@
     <string name="title_activity_movies_list">MoviesList</string>
     <string name="title_activity_movie_detail">MovieDetail</string>
     <string name="title_activity_settings">SettingActivity</string>
-
+    <string name="action_share">Share</string>
     <!-- Key name for Sort by preference in SharedPreferences [CHAR LIMIT=NONE] -->
     <string name="pref_sort_key" translatable="false">sort</string>
     <!-- Label for the Sort by preference [CHAR LIMIT=30] -->

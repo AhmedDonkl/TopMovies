@@ -1,4 +1,4 @@
-package com.example.ahmeddongl.topmovies;
+package com.example.ahmeddongl.topmovies.Controller;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -17,7 +17,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import com.example.ahmeddongl.topmovies.Data.MoviesContract;
+import com.example.ahmeddongl.topmovies.Controller.Adapters.MovieAdapter;
+import com.example.ahmeddongl.topmovies.Model.Data.MoviesContract;
+import com.example.ahmeddongl.topmovies.Model.FetchData.FetchMovieData;
+import com.example.ahmeddongl.topmovies.R;
+import com.example.ahmeddongl.topmovies.Utility;
 
 /**
  * A placeholder fragment containing a simple view.

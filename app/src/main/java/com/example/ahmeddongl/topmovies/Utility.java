@@ -7,7 +7,10 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.preference.PreferenceManager;
 
-import com.example.ahmeddongl.topmovies.Data.MoviesContract;
+import com.example.ahmeddongl.topmovies.Model.Data.MoviesContract;
+import com.example.ahmeddongl.topmovies.Model.Movie;
+import com.example.ahmeddongl.topmovies.Model.Review;
+import com.example.ahmeddongl.topmovies.Model.Trailer;
 
 import java.util.ArrayList;
 import java.util.List;

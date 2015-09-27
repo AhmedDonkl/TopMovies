@@ -1,7 +1,9 @@
-package com.example.ahmeddongl.topmovies;
+package com.example.ahmeddongl.topmovies.Controller;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+
+import com.example.ahmeddongl.topmovies.R;
 
 public class MovieDetail extends ActionBarActivity {
 
@@ -24,5 +26,6 @@ public class MovieDetail extends ActionBarActivity {
                     .commit();
         }
     }
+
 }
 

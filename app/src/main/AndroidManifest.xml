@@ -10,7 +10,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".Splash"
+            android:name=".Controller.Splash"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,30 +19,30 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MoviesList"
+            android:name=".Controller.MoviesList"
             android:label="@string/title_activity_movies_list"
             android:theme="@style/MoviesTheme">
         </activity>
 
         <provider
-            android:name=".Data.MoviesProvider"
+            android:name=".Model.Data.MoviesProvider"
             android:authorities="com.example.ahmeddongl.topmovies" />
 
         <activity
-            android:name=".MovieDetail"
+            android:name=".Controller.MovieDetail"
             android:label="@string/title_activity_movie_detail"
-            android:parentActivityName=".MoviesList" >
+            android:parentActivityName=".Controller.MoviesList" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MoviesList" />
+                android:value=".Controller.MoviesList" />
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".Controller.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".MovieDetail" >
+            android:parentActivityName=".Controller.MovieDetail" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MoviesList" />
+                android:value=".Controller.MoviesList" />
         </activity>
     </application>
 

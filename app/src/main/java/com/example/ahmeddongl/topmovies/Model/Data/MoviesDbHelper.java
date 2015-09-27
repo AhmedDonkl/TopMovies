@@ -1,4 +1,4 @@
-package com.example.ahmeddongl.topmovies.Data;
+package com.example.ahmeddongl.topmovies.Model.Data;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

@@ -5,6 +5,7 @@ package com.example.ahmeddongl.topmovies;
  */
 
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,6 +21,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
@@ -29,6 +32,8 @@ import android.widget.Toast;
 import com.example.ahmeddongl.topmovies.Data.MoviesContract;
 import com.squareup.picasso.Picasso;
 
+import java.util.List;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -37,8 +42,12 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
     private static final int DETAIL_LOADER = 0;
     static final String DETAIL_URI = "URI";
+    private String movieId;
+
     private Uri mUri;
     private Uri favoriteUriWithId;
+    private Uri trailerUriWithId;
+    private Uri reviewUriWithId;
 
     private TextView movieName;
     private TextView movieReleaseDate;
@@ -46,6 +55,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private TextView movieOverview;
     private ImageView movieImage;
     private ImageButton favoriteButton;
+    private ExpandableListView trailersExpandableList;
+    private ExpandableListView reviewsExpandableList;
 
     public MovieDetailFragment() {
         setHasOptionsMenu(true);
@@ -59,16 +70,36 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         if (arguments != null) {
             mUri = arguments.getParcelable(MovieDetailFragment.DETAIL_URI);
         }
-        //link views
-        movieName = (TextView)rootView.findViewById(R.id.detailMovieName);
-        movieReleaseDate = (TextView)rootView.findViewById(R.id.detailMovieReleaseDate);
-        movieRate = (RatingBar)rootView.findViewById(R.id.detailMovieRate);
-        movieOverview = (TextView)rootView.findViewById(R.id.detailMovieOverview);
-        movieImage = (ImageView)rootView.findViewById(R.id.detailMovieImage);
-        favoriteButton = (ImageButton)rootView.findViewById(R.id.favorite);
 
-        //get movie id from uri
-        String movieId = mUri.getPathSegments().get(1);
+        //Movie Id
+        if(mUri != null){
+        movieId = mUri.getPathSegments().get(1);
+        }
+
+        //link views
+        linkViews(rootView);
+
+        //to save movie trailers and reviews on database
+        updateTrailersAndReviews();
+
+        //check if this movie is favorite and start it
+        checkFavorite();
+
+        //add or remove movie from favorite table
+        addOrRemoveFavorite();
+
+        //inflate Trailer on Expandable list
+        inflateTrailersList();
+
+        //inflate reviews on Expandable list
+        inflateReviewsList();
+
+        return rootView;
+    }
+
+    //to check if this movie is favorite to started it
+    private void checkFavorite(){
+        //build favorite uri with movie id
         favoriteUriWithId = MoviesContract.FavoriteEntry
                 .buildFavoriteMoviesUriWithMovieId(Long.valueOf(movieId));
 
@@ -77,12 +108,14 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         if(favoriteCheck != null && favoriteCheck.getCount() > 0){
             favoriteButton.setImageResource(R.drawable.favorite_filled_pi);
         }
+    }
 
-        //add or remove movie from favorite table
+    //to add or remove movie from favorite
+    private void addOrRemoveFavorite(){
         favoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                  // if it's blank save else remove
+                // if it's blank save else remove
                 if(favoriteButton.getDrawable().getConstantState()
                         .equals(getResources().getDrawable(R.drawable.favorite_blank_pi).getConstantState())){
                     //make image started
@@ -96,36 +129,152 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                     getActivity().getContentResolver().insert(MoviesContract.FavoriteEntry.CONTENT_URI,movieContent);
 
                     //make toast to user about succeed
-                    Toast.makeText(getActivity(),"Added To Favorites", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), "Added To Favorites", Toast.LENGTH_LONG).show();
                 }
                 else{
                     new AlertDialog.Builder(getActivity())
-                        .setTitle("Remove Favorite Movie")
-                        .setMessage("Are you sure you want to Remove this Movie?")
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                //remove start from image
-                                favoriteButton.setImageResource(R.drawable.favorite_blank_pi);
+                            .setTitle("Remove Favorite Movie")
+                            .setMessage("Are you sure you want to Remove this Movie?")
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //remove start from image
+                                    favoriteButton.setImageResource(R.drawable.favorite_blank_pi);
 
-                                //delete movie from favorite
-                                getActivity().getContentResolver().delete(favoriteUriWithId,null,null);
+                                    //delete movie from favorite
+                                    getActivity().getContentResolver().delete(favoriteUriWithId,null,null);
 
-                                //make toast to user
-                                Toast.makeText(getActivity(),"Removed From Favorites", Toast.LENGTH_LONG).show();
-                            }
-                        })
-                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // do nothing
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .show();
+                                    //make toast to user
+                                    Toast.makeText(getActivity(),"Removed From Favorites", Toast.LENGTH_LONG).show();
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // do nothing
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
                 }
             }
         });
+    }
 
-        return rootView;
+    //to link views
+    private void linkViews (View rootView){
+        movieName = (TextView)rootView.findViewById(R.id.detailMovieName);
+        movieReleaseDate = (TextView)rootView.findViewById(R.id.detailMovieReleaseDate);
+        movieRate = (RatingBar)rootView.findViewById(R.id.detailMovieRate);
+        movieOverview = (TextView)rootView.findViewById(R.id.detailMovieOverview);
+        movieImage = (ImageView)rootView.findViewById(R.id.detailMovieImage);
+        favoriteButton = (ImageButton)rootView.findViewById(R.id.favorite);
+        trailersExpandableList = (ExpandableListView) rootView.findViewById(R.id.movies_trailers);
+        reviewsExpandableList = (ExpandableListView) rootView.findViewById(R.id.movies_reviews);
+    }
+
+    //inflate Trailers on list
+    private void inflateTrailersList(){
+        //build trailer uri with movie id
+        trailerUriWithId = MoviesContract.TrailersEntry
+                .buildTrailerUriWithMovieId(Long.valueOf(movieId));
+
+        //check if trailers is in database
+        final Cursor trailersData = getActivity().getContentResolver().query(trailerUriWithId, null, null, null, null);
+        final List<Trailer> trailersList = Utility.convertCursorToTrailerList(trailersData);
+        ExpandableTrailersAdapter trailersAdapter = new ExpandableTrailersAdapter(getActivity(),trailersList);
+
+        trailersExpandableList.setAdapter(trailersAdapter);
+        trailersExpandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v,
+                                        int groupPosition, long id) {
+                setListViewHeight(parent, groupPosition);
+                return false;
+            }
+        });
+
+        // Expandable list view  on child click listener
+        trailersExpandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v,
+                                        int groupPosition, int childPosition, long id) {
+                watchYoutubeVideo(trailersList.get(childPosition).mLink);
+                return false;
+            }
+        });
+
+    }
+
+    //intent to play trailers video
+    private void watchYoutubeVideo(String id){
+        try{
+            Intent intent=new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("http://www.youtube.com/watch?v="+id));
+            startActivity(intent);
+        }catch (ActivityNotFoundException ex){
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
+            startActivity(intent);
+        }
+    }
+
+    //inflate Review on list
+    private void inflateReviewsList(){
+        //build review uri with movie id
+        reviewUriWithId = MoviesContract.ReviewsEntry
+                .buildReviewUriWithMovieId(Long.valueOf(movieId));
+
+        //check if review is in database
+        final Cursor reviewData = getActivity().getContentResolver().query(reviewUriWithId, null, null, null, null);
+        final List<Review> reviewsList = Utility.convertCursorToReviewList(reviewData);
+        ExpandableReviewAdapter reviewAdapter = new ExpandableReviewAdapter(getActivity(),reviewsList);
+
+        reviewsExpandableList.setAdapter(reviewAdapter);
+        reviewsExpandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v,
+                                        int groupPosition, long id) {
+                setListViewHeight(parent, groupPosition);
+                return false;
+            }
+        });
+
+    }
+
+    //this function called to make expandable list view on scroll view
+    private void setListViewHeight(ExpandableListView listView,
+                                   int group) {
+        ExpandableListAdapter listAdapter = (ExpandableListAdapter) listView.getExpandableListAdapter();
+        int totalHeight = 0;
+        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(),
+                View.MeasureSpec.EXACTLY);
+        for (int i = 0; i < listAdapter.getGroupCount(); i++) {
+            View groupItem = listAdapter.getGroupView(i, false, null, listView);
+            groupItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+
+            totalHeight += groupItem.getMeasuredHeight();
+
+            if (((listView.isGroupExpanded(i)) && (i != group))
+                    || ((!listView.isGroupExpanded(i)) && (i == group))) {
+                for (int j = 0; j < listAdapter.getChildrenCount(i); j++) {
+                    View listItem = listAdapter.getChildView(i, j, false, null,
+                            listView);
+                    listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+
+                    totalHeight += listItem.getMeasuredHeight();
+
+                }
+            }
+        }
+
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        int height = totalHeight
+                + (listView.getDividerHeight() * (listAdapter.getGroupCount() - 1));
+        if (height < 10)
+            height = 200;
+        params.height = height;
+        listView.setLayoutParams(params);
+        listView.requestLayout();
+
     }
 
     @Override
@@ -142,14 +291,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    void onMovieChanged() {
-        // replace the uri, since the Movie has changed
-        Uri uri = mUri;
-        if (null != uri) {
-            getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
-        }
     }
 
     @Override
@@ -196,4 +337,20 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onLoaderReset(Loader<Cursor> loader) { }
 
+    void onMovieChanged() {
+        // replace the uri, since the Movie has changed
+        Uri uri = mUri;
+        if (null != uri) {
+            getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
+        }
+    }
+
+    public void updateTrailersAndReviews() {
+        //fetch trailers
+        FetchTrailerData trailerTask = new FetchTrailerData(getActivity());
+        trailerTask.execute(movieId);
+        //fetch reviews
+        FetchReviewData reviewTask = new FetchReviewData(getActivity());
+        reviewTask.execute(movieId);
+    }
 }

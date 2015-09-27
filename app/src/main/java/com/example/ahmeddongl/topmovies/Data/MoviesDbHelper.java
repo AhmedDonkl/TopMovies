@@ -51,9 +51,24 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
                 MoviesContract.COLUMN_MOV_POSTER_PATH + " TEXT NOT NULL, " +
                 MoviesContract.COLUMN_MOV_VOTE_AVERAGE + " DOUBLE NOT NULL);";
 
+        final String SQL_CREATE_TRAILERS_TABLE = "CREATE TABLE " + MoviesContract.TrailersEntry.TABLE_NAME + " (" +
+                MoviesContract.TrailersEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                MoviesContract.COLUMN_MOV_ID + " LONG NOT NULL, " +
+                MoviesContract.TrailersEntry.COLUMN_TRI_NAME + " TEXT NOT NULL, " +
+                MoviesContract.TrailersEntry.COLUMN_TRI_LINK + " TEXT NOT NULL);";
+
+
+        final String SQL_CREATE_REVIEWS_TABLE = "CREATE TABLE " + MoviesContract.ReviewsEntry.TABLE_NAME + " (" +
+                MoviesContract.ReviewsEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                MoviesContract.COLUMN_MOV_ID + " LONG NOT NULL, " +
+                MoviesContract.ReviewsEntry.COLUMN_REV_AUTHOR + " TEXT NOT NULL, " +
+                MoviesContract.ReviewsEntry.COLUMN_REV_CONTENT + " TEXT NOT NULL);";
+
         sqLiteDatabase.execSQL(SQL_CREATE_MOST_POPULAR_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_HIGHEST_RATED_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_FAVORITES_TABLE);
+        sqLiteDatabase.execSQL(SQL_CREATE_TRAILERS_TABLE);
+        sqLiteDatabase.execSQL(SQL_CREATE_REVIEWS_TABLE);
     }
 
     @Override
@@ -67,6 +82,9 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.MostPopularEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.HighestRatedEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.FavoriteEntry.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.TrailersEntry.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.ReviewsEntry.TABLE_NAME);
+
         onCreate(sqLiteDatabase);
     }
 }

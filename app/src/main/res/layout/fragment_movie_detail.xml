@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#ffffff"
+    android:fillViewport="true"
     tools:context="com.example.ahmeddongl.topmovies.MovieDetail">
 
     <RelativeLayout
@@ -77,6 +78,23 @@
             android:layout_below="@+id/detailMovieRate"
             android:src="@drawable/favorite_blank_pi"
             />
+
+     <ExpandableListView
+         android:layout_marginTop="10dp"
+         android:id="@+id/movies_trailers"
+         android:layout_width="match_parent"
+         android:layout_height="fill_parent"
+         android:layout_below="@+id/detailMovieOverview">
+     </ExpandableListView>
+
+        <ExpandableListView
+            android:layout_marginTop="10dp"
+            android:id="@+id/movies_reviews"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@+id/movies_trailers">
+        </ExpandableListView>
+
     </RelativeLayout>
 
 </ScrollView>

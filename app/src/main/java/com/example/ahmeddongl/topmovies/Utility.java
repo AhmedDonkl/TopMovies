@@ -9,6 +9,9 @@ import android.preference.PreferenceManager;
 
 import com.example.ahmeddongl.topmovies.Data.MoviesContract;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Ahmed Donkl on 9/18/2015.
  */
@@ -33,6 +36,34 @@ public class Utility {
                 cv.getAsString(MoviesContract.COLUMN_MOV_POSTER_PATH),
                 cv.getAsDouble(MoviesContract.COLUMN_MOV_VOTE_AVERAGE)
         );
+    }
+
+    public static List<Trailer> convertCursorToTrailerList(Cursor cursor) {
+        List<Trailer> trailersList = new ArrayList<>();
+        ContentValues cv = new ContentValues();
+        while (cursor.moveToNext()){
+            DatabaseUtils.cursorRowToContentValues(cursor, cv);
+            // get row indices for our cursor
+            trailersList.add(new Trailer(
+                    cv.getAsString(MoviesContract.TrailersEntry.COLUMN_TRI_NAME),
+                    cv.getAsString(MoviesContract.TrailersEntry.COLUMN_TRI_LINK)
+            ));
+        }
+        return trailersList;
+    }
+
+    public static List<Review> convertCursorToReviewList(Cursor cursor) {
+        List<Review> reviewsList = new ArrayList<>();
+        ContentValues cv = new ContentValues();
+        while (cursor.moveToNext()){
+            DatabaseUtils.cursorRowToContentValues(cursor, cv);
+            // get row indices for our cursor
+            reviewsList.add(new Review(
+                    cv.getAsString(MoviesContract.ReviewsEntry.COLUMN_REV_AUTHOR),
+                    cv.getAsString(MoviesContract.ReviewsEntry.COLUMN_REV_CONTENT)
+            ));
+        }
+        return reviewsList;
     }
 
     public static ContentValues convertMovieObjectToContentValue(Movie movie) {

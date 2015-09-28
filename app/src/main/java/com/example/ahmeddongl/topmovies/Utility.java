@@ -29,7 +29,7 @@ public class Utility {
 
     public static Movie convertCursorRowToMovieObject(Cursor cursor) {
         ContentValues cv = new ContentValues();
-        DatabaseUtils.cursorRowToContentValues(cursor, cv);
+        DatabaseUtils.cursorRowToContentValues(cursor,cv);
         // get row indices for our cursor
         return new Movie(
                 cv.getAsLong(MoviesContract.COLUMN_MOV_ID),
@@ -72,12 +72,12 @@ public class Utility {
     public static ContentValues convertMovieObjectToContentValue(Movie movie) {
         ContentValues moviesValues = new ContentValues();
 
-        moviesValues.put(MoviesContract.COLUMN_MOV_ID, movie.mId);
-        moviesValues.put(MoviesContract.COLUMN_MOV_ORIGINAL_TITLE,movie.mOriginalTitle );
-        moviesValues.put(MoviesContract.COLUMN_MOV_RELEASE_DATE, movie.mReleaseDate);
-        moviesValues.put(MoviesContract.COLUMN_MOV_OVERVIEW, movie.mOverview);
-        moviesValues.put(MoviesContract.COLUMN_MOV_POSTER_PATH,movie.mPosterPath);
-        moviesValues.put(MoviesContract.COLUMN_MOV_VOTE_AVERAGE, movie.mVoteAverage);
+        moviesValues.put(MoviesContract.COLUMN_MOV_ID, movie.id);
+        moviesValues.put(MoviesContract.COLUMN_MOV_ORIGINAL_TITLE,movie.originalTitle );
+        moviesValues.put(MoviesContract.COLUMN_MOV_RELEASE_DATE, movie.releaseDate);
+        moviesValues.put(MoviesContract.COLUMN_MOV_OVERVIEW, movie.overview);
+        moviesValues.put(MoviesContract.COLUMN_MOV_POSTER_PATH,movie.posterPath);
+        moviesValues.put(MoviesContract.COLUMN_MOV_VOTE_AVERAGE, movie.voteAverage);
 
         return moviesValues;
     }

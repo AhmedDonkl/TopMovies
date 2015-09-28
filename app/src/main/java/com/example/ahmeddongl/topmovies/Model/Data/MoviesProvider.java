@@ -30,7 +30,7 @@ public class MoviesProvider extends ContentProvider {
 
     //Movies.movies_id = ?
     private static final String sMoviesIDSelection =
-             MoviesContract.COLUMN_MOV_ID + " = ? ";
+            MoviesContract.COLUMN_MOV_ID + " = ? ";
 
 
     static UriMatcher buildUriMatcher() {
@@ -245,14 +245,14 @@ public class MoviesProvider extends ContentProvider {
                     returnUri = MoviesContract.MostPopularEntry.buildPopularMoviesUriWithID(_id);
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
-            break;
+                break;
             case HIGHEST_RATED:
-                 _id = db.insert(MoviesContract.HighestRatedEntry.TABLE_NAME, null, values);
+                _id = db.insert(MoviesContract.HighestRatedEntry.TABLE_NAME, null, values);
                 if ( _id > 0 )
                     returnUri = MoviesContract.HighestRatedEntry.buildHighestMoviesUriWithID(_id);
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
-            break;
+                break;
             case FAVORITES:
                 _id = db.insert(MoviesContract.FavoriteEntry.TABLE_NAME, null, values);
                 if ( _id > 0 )
@@ -294,12 +294,12 @@ public class MoviesProvider extends ContentProvider {
                         MoviesContract.FavoriteEntry.TABLE_NAME, sMoviesIDSelection,   new String[]{id});
                 break;
             case TRAILERS_WITH_MOVIE_ID:
-                 id = uri.getPathSegments().get(1);
+                id = uri.getPathSegments().get(1);
                 rowsDeleted = db.delete(
                         MoviesContract.TrailersEntry.TABLE_NAME, sMoviesIDSelection,   new String[]{id});
                 break;
             case REVIEWS_WITH_MOVIE_ID:
-                 id = uri.getPathSegments().get(1);
+                id = uri.getPathSegments().get(1);
                 rowsDeleted = db.delete(
                         MoviesContract.ReviewsEntry.TABLE_NAME, sMoviesIDSelection,   new String[]{id});
                 break;
@@ -315,7 +315,7 @@ public class MoviesProvider extends ContentProvider {
 
     @Override
     public int update(
-        Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+            Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         int rowsUpdated;
@@ -364,7 +364,7 @@ public class MoviesProvider extends ContentProvider {
                 return returnCount;
             case HIGHEST_RATED:
                 db.beginTransaction();
-                 returnCount = 0;
+                returnCount = 0;
                 try {
                     for (ContentValues value : values) {
                         long _id = db.insert(MoviesContract.HighestRatedEntry.TABLE_NAME, null, value);

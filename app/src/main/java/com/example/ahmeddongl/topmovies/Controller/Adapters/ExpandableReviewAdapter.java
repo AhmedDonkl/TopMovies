@@ -49,8 +49,8 @@ public class ExpandableReviewAdapter extends BaseExpandableListAdapter {
         TextView viewReviewAuthor = (TextView) convertView.findViewById(R.id.review_author);
         TextView viewReviewContent = (TextView) convertView.findViewById(R.id.review_content);
 
-        viewReviewAuthor.setText(reviewObject.mAuthor);
-        viewReviewContent.setText(reviewObject.mContent);
+        viewReviewAuthor.setText(reviewObject.author);
+        viewReviewContent.setText(reviewObject.content);
 
         return convertView;
     }

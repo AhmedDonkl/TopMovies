@@ -65,7 +65,6 @@ public class MoviesContract {
         public static Uri buildPopularMoviesUriWithMovieId(Long movieId) {
             return CONTENT_URI.buildUpon().appendPath(String.valueOf(movieId)).build();
         }
-
     }
 
     /* Inner class that defines the table contents of the Highest Rated table */
@@ -88,7 +87,6 @@ public class MoviesContract {
         public static Uri buildHighestMoviesUriWithMovieId(Long movieId) {
             return CONTENT_URI.buildUpon().appendPath(String.valueOf(movieId)).build();
         }
-
     }
 
     /* Inner class that defines the table contents of the Favorite table */

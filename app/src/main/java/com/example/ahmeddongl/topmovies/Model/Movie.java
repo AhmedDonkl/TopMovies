@@ -6,20 +6,20 @@ package com.example.ahmeddongl.topmovies.Model;
 /*This Class will represent a Movie*/
 public class Movie {
 
-    public Long mId;
-    public String mOriginalTitle;
-    public String mReleaseDate;
-    public String mOverview;
-    public String mPosterPath;
-    public  double mVoteAverage;
+    public Long id;
+    public String originalTitle;
+    public String releaseDate;
+    public String overview;
+    public String posterPath;
+    public  double voteAverage;
 
-    public Movie(Long mId,String mOriginalTitle,String mReleaseDate,String mOverview,String mPosterPath,double mVoteAverage) {
+    public Movie(Long id,String originalTitle,String releaseDate,String overview,String posterPath,double voteAverage) {
 
-        this.mId=mId;
-        this.mOriginalTitle=mOriginalTitle;
-        this.mReleaseDate=mReleaseDate;
-        this.mOverview=mOverview;
-        this.mPosterPath=mPosterPath;
-        this.mVoteAverage=mVoteAverage;
+        this.id=id;
+        this.originalTitle=originalTitle;
+        this.releaseDate=releaseDate;
+        this.overview=overview;
+        this.posterPath=posterPath;
+        this.voteAverage=voteAverage;
     }
 }

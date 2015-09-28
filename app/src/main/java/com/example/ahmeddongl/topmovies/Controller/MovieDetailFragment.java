@@ -25,9 +25,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -55,24 +55,25 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
     private static final int DETAIL_LOADER = 0;
     static final String DETAIL_URI = "URI";
-    private String movieId;
+    private static final String Movies_SHARE_HASH_TAG = " #TopMoviesApp";
+    private String mShareStr;
+    private String mMovieId = "0";
 
     private Uri mUri;
-    private Uri favoriteUriWithId;
-    private Uri trailerUriWithId;
-    private Uri reviewUriWithId;
+    private Uri mFavoriteUriWithId;
+    private Uri mTrailerUriWithId;
+    private Uri mReviewUriWithId;
 
     private TextView movieName;
     private TextView movieReleaseDate;
     private RatingBar movieRate;
     private TextView movieOverview;
     private ImageView movieImage;
-    private ImageButton favoriteButton;
+    private Button favoriteButton;
     private ExpandableListView trailersExpandableList;
     private ExpandableListView reviewsExpandableList;
 
-    private static final String Movies_SHARE_HASH_TAG = " #TopMoviesApp";
-    private String mShareStr;
+
 
     public MovieDetailFragment() {
         setHasOptionsMenu(true);
@@ -81,7 +82,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
+        View rootView = null;
         Bundle arguments = getArguments();
         if (arguments != null) {
             mUri = arguments.getParcelable(MovieDetailFragment.DETAIL_URI);
@@ -89,26 +90,30 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
         //Movie Id
         if(mUri != null){
-        movieId = mUri.getPathSegments().get(1);
+            mMovieId = mUri.getPathSegments().get(1);
         }
 
-        //link views
-        linkViews(rootView);
+        //to handle view details in tablet
+        if(!mMovieId.equals("0")){
+             rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
+            //link views
+            linkViews(rootView);
 
-        //to save movie trailers and reviews on database
-        updateTrailersAndReviews();
+            //to save movie trailers and reviews on database
+            updateTrailersAndReviews();
 
-        //check if this movie is favorite and start it
-        checkFavorite();
+            //check if this movie is favorite and start it
+            checkFavorite();
 
-        //add or remove movie from favorite table
-        addOrRemoveFavorite();
+            //add or remove movie from favorite table
+            addOrRemoveFavorite();
 
-        //inflate Trailer on Expandable list
-        inflateTrailersList();
+            //inflate Trailer on Expandable list
+            inflateTrailersList();
 
-        //inflate reviews on Expandable list
-        inflateReviewsList();
+            //inflate reviews on Expandable list
+            inflateReviewsList();
+        }
 
         return rootView;
     }
@@ -116,13 +121,14 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     //to check if this movie is favorite to started it
     private void checkFavorite(){
         //build favorite uri with movie id
-        favoriteUriWithId = MoviesContract.FavoriteEntry
-                .buildFavoriteMoviesUriWithMovieId(Long.valueOf(movieId));
+        mFavoriteUriWithId = MoviesContract.FavoriteEntry
+                .buildFavoriteMoviesUriWithMovieId(Long.valueOf(mMovieId));
 
         //check if Movie is favorite to started image view
-        Cursor favoriteCheck = getActivity().getContentResolver().query(favoriteUriWithId, null, null, null, null);
+        Cursor favoriteCheck = getActivity().getContentResolver().query(mFavoriteUriWithId, null, null, null, null);
         if(favoriteCheck != null && favoriteCheck.getCount() > 0){
-            favoriteButton.setImageResource(R.drawable.favorite_filled_pi);
+            favoriteButton.setBackgroundResource(R.drawable.favorite_filled_pi);
+            favoriteButton.setText("1");
         }
     }
 
@@ -132,17 +138,26 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             @Override
             public void onClick(View v) {
                 // if it's blank save else remove
-                if(favoriteButton.getDrawable().getConstantState()
-                        .equals(getResources().getDrawable(R.drawable.favorite_blank_pi).getConstantState())){
+                if(favoriteButton.getText().toString().equals("0")){
                     //make image started
-                    favoriteButton.setImageResource(R.drawable.favorite_filled_pi);
-
+                    favoriteButton.setBackgroundResource(R.drawable.favorite_filled_pi);
+                    favoriteButton.setText("1");
                     //add this movie to favorite table on data base
-                    Cursor movieData = getActivity().getContentResolver().query(mUri, null, null, null, null);
+                    //make try and catch to handle insert when sort base is favorites
+                    Cursor movieData;
+                    String SortBase = mUri.getPathSegments().get(0);
+                    try {
+                        mUri = Uri.parse(mUri.toString().replace(SortBase,"mostPopular"));
+                        movieData = getActivity().getContentResolver().query(mUri, null, null, null, null);
+                    }
+                    catch (Exception e){
+                        mUri = Uri.parse(mUri.toString().replace(SortBase,"highestRated"));
+                        movieData = getActivity().getContentResolver().query(mUri, null, null, null, null);
+                    }
                     movieData.moveToFirst();
                     Movie movieObject = Utility.convertCursorRowToMovieObject(movieData);
-                    ContentValues movieContent =  Utility.convertMovieObjectToContentValue(movieObject);
-                    getActivity().getContentResolver().insert(MoviesContract.FavoriteEntry.CONTENT_URI,movieContent);
+                    ContentValues movieContent = Utility.convertMovieObjectToContentValue(movieObject);
+                   getActivity().getContentResolver().insert(MoviesContract.FavoriteEntry.CONTENT_URI, movieContent);
 
                     //make toast to user about succeed
                     Toast.makeText(getActivity(), "Added To Favorites", Toast.LENGTH_LONG).show();
@@ -154,13 +169,13 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     //remove start from image
-                                    favoriteButton.setImageResource(R.drawable.favorite_blank_pi);
-
+                                    favoriteButton.setBackgroundResource(R.drawable.favorite_blank_pi);
+                                    favoriteButton.setText("0");
                                     //delete movie from favorite
-                                    getActivity().getContentResolver().delete(favoriteUriWithId,null,null);
+                                    getActivity().getContentResolver().delete(mFavoriteUriWithId, null, null);
 
                                     //make toast to user
-                                    Toast.makeText(getActivity(),"Removed From Favorites", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getActivity(), "Removed From Favorites", Toast.LENGTH_LONG).show();
                                 }
                             })
                             .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -182,7 +197,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         movieRate = (RatingBar)rootView.findViewById(R.id.detailMovieRate);
         movieOverview = (TextView)rootView.findViewById(R.id.detailMovieOverview);
         movieImage = (ImageView)rootView.findViewById(R.id.detailMovieImage);
-        favoriteButton = (ImageButton)rootView.findViewById(R.id.favorite);
+        favoriteButton = (Button)rootView.findViewById(R.id.favorite);
         trailersExpandableList = (ExpandableListView) rootView.findViewById(R.id.movies_trailers);
         reviewsExpandableList = (ExpandableListView) rootView.findViewById(R.id.movies_reviews);
     }
@@ -190,16 +205,16 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     //inflate Trailers on list
     private void inflateTrailersList(){
         //build trailer uri with movie id
-        trailerUriWithId = MoviesContract.TrailersEntry
-                .buildTrailerUriWithMovieId(Long.valueOf(movieId));
+        mTrailerUriWithId = MoviesContract.TrailersEntry
+                .buildTrailerUriWithMovieId(Long.valueOf(mMovieId));
 
         //check if trailers is in database
-        final Cursor trailersData = getActivity().getContentResolver().query(trailerUriWithId, null, null, null, null);
+        final Cursor trailersData = getActivity().getContentResolver().query(mTrailerUriWithId, null, null, null, null);
         final List<Trailer> trailersList = Utility.convertCursorToTrailerList(trailersData);
         ExpandableTrailersAdapter trailersAdapter = new ExpandableTrailersAdapter(getActivity(),trailersList);
 
         if(trailersList.size() > 0){
-            mShareStr = trailersList.get(0).mLink;
+            mShareStr = trailersList.get(0).link;
         }
         trailersExpandableList.setAdapter(trailersAdapter);
         trailersExpandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
@@ -217,7 +232,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             @Override
             public boolean onChildClick(ExpandableListView parent, View v,
                                         int groupPosition, int childPosition, long id) {
-                watchYoutubeVideo(trailersList.get(childPosition).mLink);
+                watchYoutubeVideo(trailersList.get(childPosition).link);
                 return false;
             }
         });
@@ -239,11 +254,11 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     //inflate Review on list
     private void inflateReviewsList(){
         //build review uri with movie id
-        reviewUriWithId = MoviesContract.ReviewsEntry
-                .buildReviewUriWithMovieId(Long.valueOf(movieId));
+        mReviewUriWithId = MoviesContract.ReviewsEntry
+                .buildReviewUriWithMovieId(Long.valueOf(mMovieId));
 
         //check if review is in database
-        final Cursor reviewData = getActivity().getContentResolver().query(reviewUriWithId, null, null, null, null);
+        final Cursor reviewData = getActivity().getContentResolver().query(mReviewUriWithId, null, null, null, null);
         final List<Review> reviewsList = Utility.convertCursorToReviewList(reviewData);
         ExpandableReviewAdapter reviewAdapter = new ExpandableReviewAdapter(getActivity(),reviewsList);
 
@@ -256,7 +271,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 return false;
             }
         });
-
     }
 
     //this function called to make expandable list view on scroll view
@@ -328,11 +342,11 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         Movie movieItem = Utility.convertCursorRowToMovieObject(data);
 
         //set data on views
-        movieName.setText(movieItem.mOriginalTitle);
-        movieReleaseDate.setText(movieItem.mReleaseDate);
-        movieRate.setRating((float) movieItem.mVoteAverage / 2);
-        movieOverview.setText(movieItem.mOverview);
-        Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/w185" + movieItem.mPosterPath)
+        movieName.setText(movieItem.originalTitle);
+        movieReleaseDate.setText(movieItem.releaseDate);
+        movieRate.setRating((float) movieItem.voteAverage / 2);
+        movieOverview.setText(movieItem.overview);
+        Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/w185" + movieItem.posterPath)
                 .resize(150,190)
                 .into(movieImage);
     }
@@ -381,9 +395,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     public void updateTrailersAndReviews() {
         //fetch trailers
         FetchTrailerData trailerTask = new FetchTrailerData(getActivity());
-        trailerTask.execute(movieId);
+        trailerTask.execute(mMovieId);
         //fetch reviews
         FetchReviewData reviewTask = new FetchReviewData(getActivity());
-        reviewTask.execute(movieId);
+        reviewTask.execute(mMovieId);
     }
 }

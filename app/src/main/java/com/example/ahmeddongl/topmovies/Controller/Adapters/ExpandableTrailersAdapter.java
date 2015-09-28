@@ -47,8 +47,8 @@ public class ExpandableTrailersAdapter extends BaseExpandableListAdapter {
             convertView = Inflater.inflate(R.layout.trailer_item, null);
         }
         TextView viewTrailerName = (TextView) convertView.findViewById(R.id.trailer_name);
-        viewTrailerName.setText(trailerObject.mName);
-        viewTrailerName.setHint(trailerObject.mLink);
+        viewTrailerName.setText(trailerObject.name);
+        viewTrailerName.setHint(trailerObject.link);
         return convertView;
     }
 

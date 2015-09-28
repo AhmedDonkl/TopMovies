@@ -67,16 +67,18 @@
             android:textSize="18sp"
             />
 
-        <ImageButton
+        <Button
             android:layout_toRightOf="@+id/detailMovieImage"
             android:layout_marginLeft="30dp"
             android:layout_marginTop="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:id="@+id/favorite"
             android:layout_marginRight="20dp"
             android:layout_below="@+id/detailMovieRate"
-            android:src="@drawable/favorite_blank_pi"
+            android:background="@drawable/favorite_blank_pi"
+            android:text="0"
+            android:textColor="@android:color/transparent"
             />
 
      <ExpandableListView

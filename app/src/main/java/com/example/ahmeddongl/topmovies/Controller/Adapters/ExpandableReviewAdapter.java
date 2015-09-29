@@ -40,7 +40,7 @@ public class ExpandableReviewAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
-         final Review reviewObject = (Review) getChild(groupPosition, childPosition);
+        final Review reviewObject = (Review) getChild(groupPosition, childPosition);
 
         if (convertView == null) {
             LayoutInflater Inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

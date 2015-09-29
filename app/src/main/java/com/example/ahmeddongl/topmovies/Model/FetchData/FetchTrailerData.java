@@ -109,7 +109,7 @@ public class FetchTrailerData extends AsyncTask<String, Void, Void> {
 
         try
         {
-             GetTrailersDataFromJson(movieJsonStr, params[0]);
+            GetTrailersDataFromJson(movieJsonStr, params[0]);
         } catch (JSONException e) {
             e.printStackTrace();
             Log.i("Error", e.getMessage());
@@ -146,9 +146,9 @@ public class FetchTrailerData extends AsyncTask<String, Void, Void> {
             cVVector.add(moviesValues);
         }
 
-            // build uri of Trailers and trailers with id
-            Uri trailerUri = MoviesContract.TrailersEntry.CONTENT_URI;
-            Uri trailerWithIdUri = MoviesContract.TrailersEntry.buildTrailerUriWithMovieId(Long.valueOf(movieId));
+        // build uri of Trailers and trailers with id
+        Uri trailerUri = MoviesContract.TrailersEntry.CONTENT_URI;
+        Uri trailerWithIdUri = MoviesContract.TrailersEntry.buildTrailerUriWithMovieId(Long.valueOf(movieId));
 
         int deleted = 0;
         //delete data from database
@@ -156,14 +156,13 @@ public class FetchTrailerData extends AsyncTask<String, Void, Void> {
         Log.d("Trailers Row Deleted ",String.valueOf(deleted));
 
         int inserted = 0;
-            // add to database
-            if ( cVVector.size() > 0 ) {
-                ContentValues[] cvArray = new ContentValues[cVVector.size()];
-                cVVector.toArray(cvArray);
-                inserted = mContext.getContentResolver().bulkInsert(trailerUri, cvArray);
-            }
-            Log.d("Trailer Row Inserted ",String.valueOf(inserted));
+        // add to database
+        if ( cVVector.size() > 0 ) {
+            ContentValues[] cvArray = new ContentValues[cVVector.size()];
+            cVVector.toArray(cvArray);
+            inserted = mContext.getContentResolver().bulkInsert(trailerUri, cvArray);
+        }
+        Log.d("Trailer Row Inserted ",String.valueOf(inserted));
 
     }
-
 }

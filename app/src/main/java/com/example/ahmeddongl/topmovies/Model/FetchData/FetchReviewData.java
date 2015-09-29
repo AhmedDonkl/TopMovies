@@ -109,7 +109,7 @@ public class FetchReviewData extends AsyncTask<String, Void, Void> {
 
         try
         {
-             GetReviewsDataFromJson(movieJsonStr, params[0]);
+            GetReviewsDataFromJson(movieJsonStr, params[0]);
         } catch (JSONException e) {
             e.printStackTrace();
             Log.i("Error", e.getMessage());
@@ -146,9 +146,9 @@ public class FetchReviewData extends AsyncTask<String, Void, Void> {
             cVVector.add(moviesValues);
         }
 
-            // build uri of Reviews and review with id
-            Uri reviewUri = MoviesContract.ReviewsEntry.CONTENT_URI;
-            Uri reviewWithIdUri = MoviesContract.ReviewsEntry.buildReviewUriWithMovieId(Long.valueOf(movieId));
+        // build uri of Reviews and review with id
+        Uri reviewUri = MoviesContract.ReviewsEntry.CONTENT_URI;
+        Uri reviewWithIdUri = MoviesContract.ReviewsEntry.buildReviewUriWithMovieId(Long.valueOf(movieId));
 
         int deleted = 0;
         //delete data from database
@@ -156,13 +156,13 @@ public class FetchReviewData extends AsyncTask<String, Void, Void> {
         Log.d("Reviews Row Deleted ",String.valueOf(deleted));
 
         int inserted = 0;
-            // add to database
-            if ( cVVector.size() > 0 ) {
-                ContentValues[] cvArray = new ContentValues[cVVector.size()];
-                cVVector.toArray(cvArray);
-                inserted = mContext.getContentResolver().bulkInsert(reviewUri, cvArray);
-            }
-            Log.d("Review Row Inserted ",String.valueOf(inserted));
+        // add to database
+        if ( cVVector.size() > 0 ) {
+            ContentValues[] cvArray = new ContentValues[cVVector.size()];
+            cVVector.toArray(cvArray);
+            inserted = mContext.getContentResolver().bulkInsert(reviewUri, cvArray);
+        }
+        Log.d("Review Row Inserted ",String.valueOf(inserted));
 
     }
 

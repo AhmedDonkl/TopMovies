@@ -16,8 +16,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -56,7 +54,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private static final int DETAIL_LOADER = 0;
     static final String DETAIL_URI = "URI";
     private static final String Movies_SHARE_HASH_TAG = " #TopMoviesApp";
-    private String mShareStr;
     private String mMovieId = "0";
 
     private Uri mUri;
@@ -73,7 +70,11 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private ExpandableListView trailersExpandableList;
     private ExpandableListView reviewsExpandableList;
 
+    private Cursor trailersData;
+    private Cursor reviewData;
 
+    private List<Trailer> trailersList;
+    private List<Review> reviewsList;
 
     public MovieDetailFragment() {
         setHasOptionsMenu(true);
@@ -95,7 +96,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
         //to handle view details in tablet
         if(!mMovieId.equals("0")){
-             rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
+            rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
             //link views
             linkViews(rootView);
 
@@ -157,7 +158,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                     movieData.moveToFirst();
                     Movie movieObject = Utility.convertCursorRowToMovieObject(movieData);
                     ContentValues movieContent = Utility.convertMovieObjectToContentValue(movieObject);
-                   getActivity().getContentResolver().insert(MoviesContract.FavoriteEntry.CONTENT_URI, movieContent);
+                    getActivity().getContentResolver().insert(MoviesContract.FavoriteEntry.CONTENT_URI, movieContent);
 
                     //make toast to user about succeed
                     Toast.makeText(getActivity(), "Added To Favorites", Toast.LENGTH_LONG).show();
@@ -209,13 +210,10 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 .buildTrailerUriWithMovieId(Long.valueOf(mMovieId));
 
         //check if trailers is in database
-        final Cursor trailersData = getActivity().getContentResolver().query(mTrailerUriWithId, null, null, null, null);
-        final List<Trailer> trailersList = Utility.convertCursorToTrailerList(trailersData);
+        trailersData = getActivity().getContentResolver().query(mTrailerUriWithId, null, null, null, null);
+        trailersList = Utility.convertCursorToTrailerList(trailersData);
         ExpandableTrailersAdapter trailersAdapter = new ExpandableTrailersAdapter(getActivity(),trailersList);
-
-        if(trailersList.size() > 0){
-            mShareStr = trailersList.get(0).link;
-        }
+Log.d("ccc",String.valueOf(trailersData.getCount()));
         trailersExpandableList.setAdapter(trailersAdapter);
         trailersExpandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
@@ -246,7 +244,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                     Uri.parse("http://www.youtube.com/watch?v="+id));
             startActivity(intent);
         }catch (ActivityNotFoundException ex){
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
+             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
             startActivity(intent);
         }
     }
@@ -258,8 +256,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 .buildReviewUriWithMovieId(Long.valueOf(mMovieId));
 
         //check if review is in database
-        final Cursor reviewData = getActivity().getContentResolver().query(mReviewUriWithId, null, null, null, null);
-        final List<Review> reviewsList = Utility.convertCursorToReviewList(reviewData);
+        reviewData = getActivity().getContentResolver().query(mReviewUriWithId, null, null, null, null);
+        reviewsList = Utility.convertCursorToReviewList(reviewData);
         ExpandableReviewAdapter reviewAdapter = new ExpandableReviewAdapter(getActivity(),reviewsList);
 
         reviewsExpandableList.setAdapter(reviewAdapter);
@@ -365,31 +363,43 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        inflater.inflate(R.menu.detailfragment, menu);
-
-        // Retrieve the share menu item
-        MenuItem menuItem = menu.findItem(R.id.action_share);
-
-        // Get the provider and hold onto it to set/change the share intent.
-        ShareActionProvider mShareActionProvider =
-                (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
-
-        // Attach an intent to this ShareActionProvider.  You can update this at any time,
-        // like when the user selects a new piece of data they might like to share.
-        if (mShareActionProvider != null && mShareStr != null) {
-            mShareActionProvider.setShareIntent(createShareMovieIntent());
-        } else {
-            Log.d(LOG_TAG, "Share Action Provider is null?");
-        }
+        inflater.inflate(R.menu.menu_movie_detail, menu);
     }
 
-    private Intent createShareMovieIntent() {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_share) {
+            String share = null;
+            try{
+                share = trailersList.get(0).link;
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+            // Attach an intent to this ShareActionProvider.  You can update this at any time,
+            // like when the user selects a new piece of data they might like to share.
+            if ( share != null) {
+                createShareMovieIntent(share);
+            } else {
+                Toast.makeText(getActivity(),"No Trailers available for this movie",Toast.LENGTH_LONG).show();
+                Log.d(LOG_TAG, "Share Action Provider is null?");
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void createShareMovieIntent(String share) {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         shareIntent.setType("text/plain");
         shareIntent.putExtra(Intent.EXTRA_TEXT,
-                "http://www.youtube.com/watch?v="+ mShareStr + Movies_SHARE_HASH_TAG);
-        return shareIntent;
+                "http://www.youtube.com/watch?v=" + share + Movies_SHARE_HASH_TAG);
+        startActivity(shareIntent);
     }
 
     public void updateTrailersAndReviews() {

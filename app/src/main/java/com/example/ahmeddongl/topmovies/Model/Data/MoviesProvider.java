@@ -27,11 +27,20 @@ public class MoviesProvider extends ContentProvider {
     static final int TRAILERS_WITH_MOVIE_ID = 108;
     static final int REVIEWS = 109;
     static final int REVIEWS_WITH_MOVIE_ID = 110;
+    static final int POPULAR_FIRST_MOVIE_ID = 111;
+    static final int HIGHEST_FIRST_MOVIE_ID = 112;
 
     //Movies.movies_id = ?
     private static final String sMoviesIDSelection =
             MoviesContract.COLUMN_MOV_ID + " = ? ";
 
+    //Popular Movies._id = ?
+    private static final String sFirstMoviePopularSelection =
+            MoviesContract.MostPopularEntry._ID + " = ? ";
+
+    //Highest Movies._id = ?
+    private static final String sFirstMovieHighestSelection =
+            MoviesContract.HighestRatedEntry._ID + " = ? ";
 
     static UriMatcher buildUriMatcher() {
         // All paths added to the UriMatcher have a corresponding code to return when a match is
@@ -54,6 +63,9 @@ public class MoviesProvider extends ContentProvider {
 
         matcher.addURI(authority, MoviesContract.PATH_REVIEWS, REVIEWS);
         matcher.addURI(authority, MoviesContract.PATH_REVIEWS  + "/#", REVIEWS_WITH_MOVIE_ID);
+
+        matcher.addURI(authority, MoviesContract.PATH_MOST_POPULAR  + "/first", POPULAR_FIRST_MOVIE_ID);
+        matcher.addURI(authority, MoviesContract.PATH_HIGHEST_RATED  + "/first", HIGHEST_FIRST_MOVIE_ID);
 
         return matcher;
     }
@@ -165,6 +177,11 @@ public class MoviesProvider extends ContentProvider {
             case REVIEWS_WITH_MOVIE_ID:
                 return MoviesContract.ReviewsEntry.CONTENT_ITEM_TYPE;
 
+            case POPULAR_FIRST_MOVIE_ID:
+                return MoviesContract.MostPopularEntry.CONTENT_ITEM_TYPE;
+            case HIGHEST_FIRST_MOVIE_ID:
+                return MoviesContract.HighestRatedEntry.CONTENT_ITEM_TYPE;
+
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -224,6 +241,28 @@ public class MoviesProvider extends ContentProvider {
                 break;
             case REVIEWS_WITH_MOVIE_ID:
                 retCursor = getReviewWithMovieId(uri, projection, sortOrder);
+                break;
+            case POPULAR_FIRST_MOVIE_ID:
+                retCursor =  mOpenHelper.getReadableDatabase().query(
+                        MoviesContract.MostPopularEntry.TABLE_NAME,
+                        projection,
+                        sFirstMoviePopularSelection,
+                        new String[]{"1"},
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+            case HIGHEST_FIRST_MOVIE_ID:
+                retCursor =  mOpenHelper.getReadableDatabase().query(
+                        MoviesContract.HighestRatedEntry.TABLE_NAME,
+                        projection,
+                        sFirstMovieHighestSelection,
+                        new String[]{"1"},
+                        null,
+                        null,
+                        sortOrder
+                );
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

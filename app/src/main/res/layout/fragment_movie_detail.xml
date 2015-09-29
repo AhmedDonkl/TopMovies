@@ -81,21 +81,27 @@
             android:textColor="@android:color/transparent"
             />
 
-     <ExpandableListView
-         android:layout_marginTop="10dp"
-         android:id="@+id/movies_trailers"
-         android:layout_width="match_parent"
-         android:layout_height="fill_parent"
-         android:layout_below="@+id/detailMovieOverview">
-     </ExpandableListView>
-
-        <ExpandableListView
+        <LinearLayout
+            android:layout_below="@+id/detailMovieOverview"
             android:layout_marginTop="10dp"
-            android:id="@+id/movies_reviews"
-            android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:layout_below="@+id/movies_trailers">
-        </ExpandableListView>
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ExpandableListView
+                android:id="@+id/movies_trailers"
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                >
+            </ExpandableListView>
+
+            <ExpandableListView
+                android:layout_marginTop="10dp"
+                android:id="@+id/movies_reviews"
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                >
+            </ExpandableListView>
+        </LinearLayout>
 
     </RelativeLayout>
 

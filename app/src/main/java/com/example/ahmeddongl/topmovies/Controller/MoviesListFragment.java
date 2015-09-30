@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,7 +27,7 @@ import com.example.ahmeddongl.topmovies.Utility;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MoviesListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class MoviesListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,SwipeRefreshLayout.OnRefreshListener{
 
     private MovieAdapter mMovieAdapter;
     private static final int MOVIES_LOADER = 0;
@@ -46,6 +47,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     static final int COL_MOV_VOTE_AVERAGE = 6;
     static final int COL_MOV_SORT_BY = 7;
 
+    private SwipeRefreshLayout refreshLayout;
     /**
      * A callback interface that all activities containing this fragment must
      * implement. This mechanism allows activities to be notified of item
@@ -66,7 +68,14 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies_list, container, false);
 
-        // Initialize our Adapter.
+        refreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_container);
+        refreshLayout.setOnRefreshListener(this);
+        refreshLayout.setColorScheme(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+    // Initialize our Adapter.
         mMovieAdapter = new MovieAdapter(getActivity(), null, 0);
 
         // Get a reference to the GridView, and attach this adapter to it.
@@ -112,6 +121,10 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
         }
 
         return rootView;
+    }
+
+    @Override public void onRefresh() {
+        onSortByChanged();
     }
 
     @Override
@@ -194,10 +207,6 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
             startActivity(new Intent(getActivity(),SettingsActivity.class));
             return true;
         }
-        if (id == R.id.action_refresh) {
-            updateMovies();
-            return true;
-        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -205,6 +214,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     void onSortByChanged( ) {
         updateMovies();
         getLoaderManager().restartLoader(MOVIES_LOADER, null, this);
+        refreshLayout.setRefreshing(false);
     }
 
     public void updateMovies() {

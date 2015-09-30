@@ -230,7 +230,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                     Uri.parse("http://www.youtube.com/watch?v="+id));
             startActivity(intent);
         }catch (ActivityNotFoundException ex){
-             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
             startActivity(intent);
         }
     }

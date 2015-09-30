@@ -3,6 +3,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <GridView
         style="@style/MoviesListStyle"
         android:id="@+id/movie_grid"
@@ -12,4 +16,5 @@
         android:horizontalSpacing="0dp"
         android:stretchMode="columnWidth"
         android:numColumns="2" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 </FrameLayout>

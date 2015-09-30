@@ -52,6 +52,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
     private static final int DETAIL_LOADER = 0;
+    private static final int TRAILERS_LOADER = 1;
+    private static final int REVIEWS_LOADER = 2;
     static final String DETAIL_URI = "URI";
     private static final String Movies_SHARE_HASH_TAG = " #TopMoviesApp";
     private String mMovieId = "0";
@@ -69,9 +71,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private Button favoriteButton;
     private ExpandableListView trailersExpandableList;
     private ExpandableListView reviewsExpandableList;
-
-    private Cursor trailersData;
-    private Cursor reviewData;
 
     private List<Trailer> trailersList;
     private List<Review> reviewsList;
@@ -108,12 +107,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
             //add or remove movie from favorite table
             addOrRemoveFavorite();
-
-            //inflate Trailer on Expandable list
-            inflateTrailersList();
-
-            //inflate reviews on Expandable list
-            inflateReviewsList();
         }
 
         return rootView;
@@ -204,16 +197,10 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     }
 
     //inflate Trailers on list
-    private void inflateTrailersList(){
-        //build trailer uri with movie id
-        mTrailerUriWithId = MoviesContract.TrailersEntry
-                .buildTrailerUriWithMovieId(Long.valueOf(mMovieId));
-
-        //check if trailers is in database
-        trailersData = getActivity().getContentResolver().query(mTrailerUriWithId, null, null, null, null);
+    private void inflateTrailersList(Cursor trailersData){
         trailersList = Utility.convertCursorToTrailerList(trailersData);
         ExpandableTrailersAdapter trailersAdapter = new ExpandableTrailersAdapter(getActivity(),trailersList);
-Log.d("ccc",String.valueOf(trailersData.getCount()));
+
         trailersExpandableList.setAdapter(trailersAdapter);
         trailersExpandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
@@ -234,7 +221,6 @@ Log.d("ccc",String.valueOf(trailersData.getCount()));
                 return false;
             }
         });
-
     }
 
     //intent to play trailers video
@@ -250,13 +236,7 @@ Log.d("ccc",String.valueOf(trailersData.getCount()));
     }
 
     //inflate Review on list
-    private void inflateReviewsList(){
-        //build review uri with movie id
-        mReviewUriWithId = MoviesContract.ReviewsEntry
-                .buildReviewUriWithMovieId(Long.valueOf(mMovieId));
-
-        //check if review is in database
-        reviewData = getActivity().getContentResolver().query(mReviewUriWithId, null, null, null, null);
+    private void inflateReviewsList(Cursor reviewData){
         reviewsList = Utility.convertCursorToReviewList(reviewData);
         ExpandableReviewAdapter reviewAdapter = new ExpandableReviewAdapter(getActivity(),reviewsList);
 
@@ -311,22 +291,51 @@ Log.d("ccc",String.valueOf(trailersData.getCount()));
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+        getLoaderManager().initLoader(TRAILERS_LOADER, null, this);
+        getLoaderManager().initLoader(REVIEWS_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if ( null != mUri ) {
-            // Now create and return a CursorLoader that will take care of
-            // creating a Cursor for the data being displayed.
-            return new CursorLoader(
-                    getActivity(),
-                    mUri,
-                    null,
-                    null,
-                    null,
-                    null
-            );
+        switch (id){
+            case DETAIL_LOADER:
+                if ( null != mUri ) {
+                    // Now create and return a CursorLoader that will take care of
+                    // creating a Cursor for the data being displayed.
+                    return new CursorLoader(
+                            getActivity(),
+                            mUri,
+                            null,
+                            null,
+                            null,
+                            null
+                    );
+                }
+            case TRAILERS_LOADER:
+                //build trailer uri with movie id
+                mTrailerUriWithId = MoviesContract.TrailersEntry
+                        .buildTrailerUriWithMovieId(Long.valueOf(mMovieId));
+                return new CursorLoader(
+                        getActivity(),
+                        mTrailerUriWithId,
+                        null,
+                        null,
+                        null,
+                        null
+                );
+            case REVIEWS_LOADER:
+                //build review uri with movie id
+                mReviewUriWithId = MoviesContract.ReviewsEntry
+                        .buildReviewUriWithMovieId(Long.valueOf(mMovieId));
+                return new CursorLoader(
+                        getActivity(),
+                        mReviewUriWithId,
+                        null,
+                        null,
+                        null,
+                        null
+                );
         }
         return null;
     }
@@ -336,17 +345,26 @@ Log.d("ccc",String.valueOf(trailersData.getCount()));
         Log.v(LOG_TAG, "In onLoadFinished");
         if (!data.moveToFirst()) { return; }
 
-        //get object from intent
-        Movie movieItem = Utility.convertCursorRowToMovieObject(data);
+        switch (loader.getId()){
+            case DETAIL_LOADER:
+                //get object from intent
+                Movie movieItem = Utility.convertCursorRowToMovieObject(data);
+                //set data on views
+                movieName.setText(movieItem.originalTitle);
+                movieReleaseDate.setText(movieItem.releaseDate);
+                movieRate.setRating((float) movieItem.voteAverage / 2);
+                movieOverview.setText(movieItem.overview);
+                Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/w185" + movieItem.posterPath)
+                        .resize(150,190)
+                        .into(movieImage);
+            case TRAILERS_LOADER:
+                //inflate Trailer on Expandable list
+                inflateTrailersList(data);
+            case REVIEWS_LOADER:
+                //inflate reviews on Expandable list
+                inflateReviewsList(data);
+        }
 
-        //set data on views
-        movieName.setText(movieItem.originalTitle);
-        movieReleaseDate.setText(movieItem.releaseDate);
-        movieRate.setRating((float) movieItem.voteAverage / 2);
-        movieOverview.setText(movieItem.overview);
-        Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/w185" + movieItem.posterPath)
-                .resize(150,190)
-                .into(movieImage);
     }
 
     @Override
@@ -357,6 +375,8 @@ Log.d("ccc",String.valueOf(trailersData.getCount()));
         Uri uri = mUri;
         if (null != uri) {
             getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
+            getLoaderManager().restartLoader(TRAILERS_LOADER, null, this);
+            getLoaderManager().restartLoader(REVIEWS_LOADER, null, this);
         }
     }
 

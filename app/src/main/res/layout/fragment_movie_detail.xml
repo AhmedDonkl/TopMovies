@@ -1,11 +1,15 @@
-<ScrollView
+<FrameLayout
+    android:id="@+id/detail_container"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffffff"
-    android:fillViewport="true"
     tools:context="com.example.ahmeddongl.topmovies.Controller.MovieDetail">
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:fillViewport="true">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -80,7 +84,6 @@
             android:text="0"
             android:textColor="@android:color/transparent"
             />
-
         <LinearLayout
             android:layout_below="@+id/detailMovieOverview"
             android:layout_marginTop="10dp"
@@ -106,3 +109,11 @@
     </RelativeLayout>
 
 </ScrollView>
+
+    <ImageView
+        android:id="@+id/expanded_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        />
+</FrameLayout>

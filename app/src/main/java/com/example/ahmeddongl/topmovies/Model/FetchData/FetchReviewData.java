@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.example.ahmeddongl.topmovies.Model.Data.MoviesContract;
+import com.example.ahmeddongl.topmovies.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,7 +50,7 @@ public class FetchReviewData extends AsyncTask<String, Void, Void> {
             final String MOVIE_BASE_URL =
                     "http://api.themoviedb.org/3/movie/"+params[0]+"/reviews?";
             final String API_PARAM = "api_key";
-            final String API_KEY = "b821c2f9d27847f2406a800b7a3afe84";
+            final String API_KEY = mContext.getString(R.string.api_key);;
 
             //Url of json file no need to uri builder
             Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()

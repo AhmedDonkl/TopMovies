@@ -1,6 +1,5 @@
 package com.example.ahmeddongl.topmovies.Controller;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,19 +9,16 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import com.example.ahmeddongl.topmovies.R;
+import com.example.ahmeddongl.topmovies.Utility;
 import com.example.ahmeddongl.topmovies.Controller.Adapters.MovieAdapter;
 import com.example.ahmeddongl.topmovies.Model.Data.MoviesContract;
 import com.example.ahmeddongl.topmovies.Model.FetchData.FetchMovieData;
-import com.example.ahmeddongl.topmovies.R;
-import com.example.ahmeddongl.topmovies.Utility;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -40,14 +36,8 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     // These indices are tied to MOVIES_COLUMNS.  If MOVIES_COLUMNS changes, these
     // must change.
     static final int COL_MOV_ID = 1;
-    static final int COL_MOV_ORIGINAL_TITLE = 2;
-    static final int COL_MOV_RELEASE_DATE = 3;
-    static final int COL_MOV_OVERVIEW = 4;
-    static final int COL_MOV_POSTER_PATH = 5;
-    static final int COL_MOV_VOTE_AVERAGE = 6;
-    static final int COL_MOV_SORT_BY = 7;
 
-    private SwipeRefreshLayout refreshLayout;
+    private SwipeRefreshLayout mRefreshLayout;
     /**
      * A callback interface that all activities containing this fragment must
      * implement. This mechanism allows activities to be notified of item
@@ -57,7 +47,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
         /**
          * DetailFragmentCallback for when an item has been selected.
          */
-        public void onItemSelected(Uri idUri);
+         void onItemSelected(Uri idUri);
     }
 
     public MoviesListFragment() {
@@ -68,20 +58,43 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies_list, container, false);
 
-        refreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_container);
-        refreshLayout.setOnRefreshListener(this);
-        refreshLayout.setColorScheme(android.R.color.holo_blue_bright,
+        linkViews(rootView);
+
+        //implement pull to refresh
+        pullToRefresh();
+
+        //Initialize grid view with adapter
+        InitializeGridView();
+
+        //get position from bundle
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
+            mPosition = savedInstanceState.getInt(SELECTED_KEY);
+        }
+
+        return rootView;
+    }
+
+    //to link views
+    private void linkViews (View rootView){
+        mRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_container);
+        mGridView = (GridView)rootView.findViewById(R.id.movie_grid);
+    }
+
+    //implement pull to refresh functionality
+    private void pullToRefresh(){
+        mRefreshLayout.setOnRefreshListener(this);
+        mRefreshLayout.setColorScheme(android.R.color.holo_blue_bright,
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
+    }
 
-    // Initialize our Adapter.
+    //Initialize grid view with adapter
+    private void InitializeGridView(){
+        // Initialize our Adapter.
         mMovieAdapter = new MovieAdapter(getActivity(), null, 0);
-
         // Get a reference to the GridView, and attach this adapter to it.
-        mGridView = (GridView)rootView.findViewById(R.id.movie_grid);
         mGridView.setAdapter(mMovieAdapter);
-
         // On click on item listener
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -93,19 +106,17 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
                 if (cursor != null) {
                     String sortBy = Utility.getPreferredSortBy(getActivity());
                     //check about sort by to get correct uri
-                    if(sortBy.equals("popularity.desc")) {
+                    if (sortBy.equals("popularity.desc")) {
                         ((Callback) getActivity())
                                 .onItemSelected(MoviesContract.MostPopularEntry.buildPopularMoviesUriWithMovieId(
                                         cursor.getLong(COL_MOV_ID)
                                 ));
-                    }
-                    else if(sortBy.equals("vote_average.desc")){
+                    } else if (sortBy.equals("vote_average.desc")) {
                         ((Callback) getActivity())
                                 .onItemSelected(MoviesContract.HighestRatedEntry.buildHighestMoviesUriWithMovieId(
                                         cursor.getLong(COL_MOV_ID)
                                 ));
-                    }
-                    else{
+                    } else {
                         ((Callback) getActivity())
                                 .onItemSelected(MoviesContract.FavoriteEntry.buildFavoriteMoviesUriWithMovieId(
                                         cursor.getLong(COL_MOV_ID)
@@ -114,13 +125,6 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
                 }
             }
         });
-
-        //get position from bundle
-        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
-            mPosition = savedInstanceState.getInt(SELECTED_KEY);
-        }
-
-        return rootView;
     }
 
     @Override public void onRefresh() {
@@ -192,29 +196,11 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
         setHasOptionsMenu(true);
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_movies_list, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(getActivity(),SettingsActivity.class));
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     // since we read sort by when we create the loader, all we need to do is restart things
     void onSortByChanged( ) {
         updateMovies();
         getLoaderManager().restartLoader(MOVIES_LOADER, null, this);
-        refreshLayout.setRefreshing(false);
+        mRefreshLayout.setRefreshing(false);
     }
 
     public void updateMovies() {
@@ -222,5 +208,4 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
         String sortBy = Utility.getPreferredSortBy(getActivity());
         movieTask.execute(sortBy);
     }
-
 }

@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.ahmeddongl.topmovies.Model.Movie;
+import com.example.ahmeddongl.topmovies.Model.Data.Movie;
 import com.example.ahmeddongl.topmovies.R;
 import com.example.ahmeddongl.topmovies.Utility;
 import com.squareup.picasso.Picasso;

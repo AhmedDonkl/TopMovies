@@ -45,9 +45,9 @@ import com.example.ahmeddongl.topmovies.Controller.Adapters.ExpandableTrailersAd
 import com.example.ahmeddongl.topmovies.Model.Data.MoviesContract;
 import com.example.ahmeddongl.topmovies.Model.FetchData.FetchReviewData;
 import com.example.ahmeddongl.topmovies.Model.FetchData.FetchTrailerData;
-import com.example.ahmeddongl.topmovies.Model.Movie;
-import com.example.ahmeddongl.topmovies.Model.Review;
-import com.example.ahmeddongl.topmovies.Model.Trailer;
+import com.example.ahmeddongl.topmovies.Model.Data.Movie;
+import com.example.ahmeddongl.topmovies.Model.Data.Review;
+import com.example.ahmeddongl.topmovies.Model.Data.Trailer;
 import com.example.ahmeddongl.topmovies.R;
 import com.example.ahmeddongl.topmovies.Utility;
 import com.squareup.picasso.Picasso;
@@ -73,21 +73,23 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private Uri mTrailerUriWithId;
     private Uri mReviewUriWithId;
 
-    private TextView movieName;
-    private TextView movieReleaseDate;
-    private RatingBar movieRate;
-    private TextView movieOverview;
-    private ImageView movieImage;
-    private ImageView expandedImage;
-    private View viewContainer;
+    private TextView mMovieName;
+    private TextView mMovieRateText;
+    private TextView mMovieReleaseDate;
+    private RatingBar mMovieRate;
+    private TextView mMovieOverview;
+    private ImageView mMovieImage;
+    private ImageView mExpandedImage;
+    private View mViewContainer;
 
-    private Button favoriteButton;
+    private Button mFavoriteButton;
     private ExpandableListView trailersExpandableList;
     private ExpandableListView reviewsExpandableList;
 
     private List<Trailer> trailersList;
     private List<Review> reviewsList;
 
+    private Movie mMovieItem;
     // Hold a reference to the current animator,
     // so that it can be canceled mid-way.
     private Animator mCurrentAnimator;
@@ -140,10 +142,10 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     //zoom movie poster on click
     private void zoomMoviePoster(){
         // Hook up clicks on the thumbnail views.
-        movieImage.setOnClickListener(new View.OnClickListener() {
+        mMovieImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                zoomImageFromThumb(movieImage,expandedImage);
+                zoomImageFromThumb(mMovieImage,mExpandedImage);
             }
         });
 
@@ -161,36 +163,23 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         //check if Movie is favorite to started image view
         Cursor favoriteCheck = getActivity().getContentResolver().query(mFavoriteUriWithId, null, null, null, null);
         if(favoriteCheck != null && favoriteCheck.getCount() > 0){
-            favoriteButton.setBackgroundResource(R.drawable.favorite_filled_pi);
-            favoriteButton.setText("1");
+            mFavoriteButton.setBackgroundResource(R.drawable.favorite_filled_pi);
+            mFavoriteButton.setText("1");
         }
     }
 
     //to add or remove movie from favorite
     private void addOrRemoveFavorite(){
-        favoriteButton.setOnClickListener(new View.OnClickListener() {
+        mFavoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // if it's blank save else remove
-                if(favoriteButton.getText().toString().equals("0")){
+                if(mFavoriteButton.getText().toString().equals("0")){
                     //make image started
-                    favoriteButton.setBackgroundResource(R.drawable.favorite_filled_pi);
-                    favoriteButton.setText("1");
+                    mFavoriteButton.setBackgroundResource(R.drawable.favorite_filled_pi);
+                    mFavoriteButton.setText("1");
                     //add this movie to favorite table on data base
-                    //make try and catch to handle insert when sort base is favorites
-                    Cursor movieData;
-                    String SortBase = mUri.getPathSegments().get(0);
-                    try {
-                        mUri = Uri.parse(mUri.toString().replace(SortBase,"mostPopular"));
-                        movieData = getActivity().getContentResolver().query(mUri, null, null, null, null);
-                    }
-                    catch (Exception e){
-                        mUri = Uri.parse(mUri.toString().replace(SortBase,"highestRated"));
-                        movieData = getActivity().getContentResolver().query(mUri, null, null, null, null);
-                    }
-                    movieData.moveToFirst();
-                    Movie movieObject = Utility.convertCursorRowToMovieObject(movieData);
-                    ContentValues movieContent = Utility.convertMovieObjectToContentValue(movieObject);
+                    ContentValues movieContent = Utility.convertMovieObjectToContentValue(mMovieItem);
                     getActivity().getContentResolver().insert(MoviesContract.FavoriteEntry.CONTENT_URI, movieContent);
 
                     //make toast to user about succeed
@@ -203,8 +192,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     //remove start from image
-                                    favoriteButton.setBackgroundResource(R.drawable.favorite_blank_pi);
-                                    favoriteButton.setText("0");
+                                    mFavoriteButton.setBackgroundResource(R.drawable.favorite_blank_pi);
+                                    mFavoriteButton.setText("0");
                                     //delete movie from favorite
                                     getActivity().getContentResolver().delete(mFavoriteUriWithId, null, null);
 
@@ -226,16 +215,17 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     //to link views
     private void linkViews (View rootView){
-        movieName = (TextView)rootView.findViewById(R.id.detailMovieName);
-        movieReleaseDate = (TextView)rootView.findViewById(R.id.detailMovieReleaseDate);
-        movieRate = (RatingBar)rootView.findViewById(R.id.detailMovieRate);
-        movieOverview = (TextView)rootView.findViewById(R.id.detailMovieOverview);
-        movieImage = (ImageView)rootView.findViewById(R.id.detailMovieImage);
-        favoriteButton = (Button)rootView.findViewById(R.id.favorite);
+        mMovieName = (TextView)rootView.findViewById(R.id.detailMovieName);
+        mMovieRateText= (TextView)rootView.findViewById(R.id.detailMovieRateText);
+        mMovieReleaseDate = (TextView)rootView.findViewById(R.id.detailMovieReleaseDate);
+        mMovieRate = (RatingBar)rootView.findViewById(R.id.detailMovieRate);
+        mMovieOverview = (TextView)rootView.findViewById(R.id.detailMovieOverview);
+        mMovieImage = (ImageView)rootView.findViewById(R.id.detailMovieImage);
+        mFavoriteButton = (Button)rootView.findViewById(R.id.favorite);
         trailersExpandableList = (ExpandableListView) rootView.findViewById(R.id.movies_trailers);
         reviewsExpandableList = (ExpandableListView) rootView.findViewById(R.id.movies_reviews);
-        expandedImage = (ImageView) rootView.findViewById(R.id.expanded_image);
-        viewContainer = rootView.findViewById(R.id.detail_container);
+        mExpandedImage = (ImageView) rootView.findViewById(R.id.expanded_image);
+        mViewContainer = rootView.findViewById(R.id.detail_container);
     }
 
     //inflate Trailers on list
@@ -390,16 +380,17 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         switch (loader.getId()){
             case DETAIL_LOADER:
                 //get object from intent
-                Movie movieItem = Utility.convertCursorRowToMovieObject(data);
+                mMovieItem = Utility.convertCursorRowToMovieObject(data);
                 //set data on views
-                movieName.setText(movieItem.originalTitle);
-                movieReleaseDate.setText(movieItem.releaseDate);
-                movieRate.setRating((float) movieItem.voteAverage / 2);
-                movieOverview.setText(movieItem.overview);
-                Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/w185" + movieItem.posterPath)
+                mMovieName.setText(mMovieItem.originalTitle);
+                mMovieReleaseDate.setText(mMovieItem.releaseDate);
+                mMovieRate.setRating((float) mMovieItem.voteAverage / 2);
+                mMovieRateText.setText(String.valueOf((float) mMovieItem.voteAverage / 2));
+                mMovieOverview.setText(mMovieItem.overview);
+                Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/w185" + mMovieItem.posterPath)
                         .resize(150,190)
-                        .into(movieImage);
-                mPosterLink = movieItem.posterPath;
+                        .into(mMovieImage);
+                mPosterLink = mMovieItem.posterPath;
             case TRAILERS_LOADER:
                 //inflate Trailer on Expandable list
                 inflateTrailersList(data);
@@ -407,7 +398,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 //inflate reviews on Expandable list
                 inflateReviewsList(data);
         }
-
     }
 
     @Override
@@ -501,7 +491,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         // properties (X, Y).
         thumbView.getGlobalVisibleRect(startBounds);
 
-        viewContainer.getGlobalVisibleRect(finalBounds, globalOffset);
+        mViewContainer.getGlobalVisibleRect(finalBounds, globalOffset);
         startBounds.offset(-globalOffset.x, -globalOffset.y);
         finalBounds.offset(-globalOffset.x, -globalOffset.y);
 

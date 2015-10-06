@@ -1,20 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<android.support.v4.widget.DrawerLayout
+    android:id="@+id/drawer_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_container"
+    <!-- The main content view -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    <GridView
-        style="@style/MoviesListStyle"
-        android:id="@+id/movie_grid"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:verticalSpacing="0dp"
-        android:horizontalSpacing="0dp"
-        android:stretchMode="columnWidth"
-        android:numColumns="2" />
-    </android.support.v4.widget.SwipeRefreshLayout>
-</FrameLayout>
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <GridView
+                style="@style/MoviesListStyle"
+                android:id="@+id/movie_grid"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:verticalSpacing="0dp"
+                android:horizontalSpacing="0dp"
+                android:stretchMode="columnWidth"
+                android:numColumns="2" />
+        </android.support.v4.widget.SwipeRefreshLayout>
+    </FrameLayout>
+    <!-- The navigation drawer -->
+    <ListView android:id="@+id/left_drawer"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:background="#ffffff"/>
+</android.support.v4.widget.DrawerLayout>

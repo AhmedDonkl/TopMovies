@@ -9,7 +9,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 import com.example.ahmeddongl.topmovies.R;
-import com.example.ahmeddongl.topmovies.Model.Review;
+import com.example.ahmeddongl.topmovies.Model.Data.Review;
 
 import java.util.List;
 

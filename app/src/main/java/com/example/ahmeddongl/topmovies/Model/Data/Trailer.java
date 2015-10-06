@@ -1,4 +1,4 @@
-package com.example.ahmeddongl.topmovies.Model;
+package com.example.ahmeddongl.topmovies.Model.Data;
 
 /**
  * Created by Ahmed Donkl on 9/26/2015.

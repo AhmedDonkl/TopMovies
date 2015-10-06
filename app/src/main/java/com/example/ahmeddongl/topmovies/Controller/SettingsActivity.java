@@ -27,7 +27,7 @@ public class SettingsActivity extends PreferenceActivity
         implements Preference.OnPreferenceChangeListener {
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         // Add 'general' preferences, defined in the XML file
         addPreferencesFromResource(R.xml.pref_general);

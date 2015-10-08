@@ -51,6 +51,15 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
                 MoviesContract.COLUMN_MOV_POSTER_PATH + " TEXT NOT NULL, " +
                 MoviesContract.COLUMN_MOV_VOTE_AVERAGE + " DOUBLE NOT NULL);";
 
+        final String SQL_CREATE_SEARCH_TABLE = "CREATE TABLE " + MoviesContract.SearchEntry.TABLE_NAME + " (" +
+                MoviesContract.SearchEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                MoviesContract.COLUMN_MOV_ID + " LONG NOT NULL, " +
+                MoviesContract.COLUMN_MOV_ORIGINAL_TITLE + " TEXT NOT NULL, " +
+                MoviesContract.COLUMN_MOV_RELEASE_DATE + " TEXT NOT NULL, " +
+                MoviesContract.COLUMN_MOV_OVERVIEW + " TEXT NOT NULL," +
+                MoviesContract.COLUMN_MOV_POSTER_PATH + " TEXT NOT NULL, " +
+                MoviesContract.COLUMN_MOV_VOTE_AVERAGE + " DOUBLE NOT NULL);";
+
         final String SQL_CREATE_TRAILERS_TABLE = "CREATE TABLE " + MoviesContract.TrailersEntry.TABLE_NAME + " (" +
                 MoviesContract.TrailersEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 MoviesContract.COLUMN_MOV_ID + " LONG NOT NULL, " +
@@ -66,6 +75,7 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
 
         sqLiteDatabase.execSQL(SQL_CREATE_MOST_POPULAR_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_HIGHEST_RATED_TABLE);
+        sqLiteDatabase.execSQL(SQL_CREATE_SEARCH_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_FAVORITES_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_TRAILERS_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_REVIEWS_TABLE);
@@ -81,6 +91,7 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
         // should be your top priority before modifying this method.
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.MostPopularEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.HighestRatedEntry.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.SearchEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.FavoriteEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.TrailersEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesContract.ReviewsEntry.TABLE_NAME);

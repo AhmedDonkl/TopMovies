@@ -3,12 +3,14 @@
     package="com.example.ahmeddongl.topmovies" >
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+
         <activity
             android:name=".Controller.Splash"
             android:label="@string/app_name" >
@@ -20,14 +22,8 @@
 
         <activity
             android:name=".Controller.MoviesList"
-            android:label="@string/title_activity_movies_list"
-            >
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-            </intent-filter>
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
+            android:label="@string/title_activity_movies_list" >
+            <meta-data android:name="android.app.default_searchable" android:value=".Controller.SearchResults" />
         </activity>
 
         <provider
@@ -42,7 +38,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Controller.MoviesList" />
         </activity>
-
         <activity
             android:name=".Controller.SettingsActivity"
             android:label="@string/title_activity_settings"
@@ -52,7 +47,24 @@
                 android:value=".Controller.MoviesList" />
         </activity>
 
-        <meta-data android:name="android.app.default_searchable" android:resource="@xml/searchable" android:value=".controller.MoviesList" />
+        <activity
+            android:name=".Controller.SearchResults"
+            android:label="@string/title_activity_search_results" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".Controller.MoviesList" />
+        </activity>
+
+        <meta-data
+            android:name="android.app.default_searchable"
+            android:resource="@xml/searchable"
+            android:value=".controller.SearchResults" />
 
     </application>
 

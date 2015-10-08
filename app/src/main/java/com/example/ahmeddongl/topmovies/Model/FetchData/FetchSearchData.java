@@ -25,17 +25,26 @@ import java.util.Vector;
  * Created by Ahmed Dongl on 8/22/2015.
  */
 
-/*this class responsible for fetch movie data from api */
-public class FetchTrailerData extends AsyncTask<String, Void, Void> {
+/*this class responsible for fetch Search data from api */
+public class FetchSearchData extends AsyncTask<String, Void, Void> {
 
     private final Context mContext;
+    private Uri mSearchUri ;
 
-    public FetchTrailerData(Context context) {
+    public FetchSearchData(Context context) {
         mContext = context;
     }
 
     @Override
     protected Void doInBackground(String... params) {
+
+        //first delete search table content
+        mSearchUri = MoviesContract.SearchEntry.CONTENT_URI;
+
+        int deleted = 0;
+        //delete data from database
+        deleted = mContext.getContentResolver().delete(mSearchUri,null,null);
+        Log.d("Search Row Deleted ",String.valueOf(deleted));
 
         // These two need to be declared outside the try/catch
         // so that they can be closed in the finally block.
@@ -46,20 +55,21 @@ public class FetchTrailerData extends AsyncTask<String, Void, Void> {
         String movieJsonStr = null;
 
         try {
-
             final String MOVIE_BASE_URL =
-                    "http://api.themoviedb.org/3/movie/"+params[0]+"/videos?";
+                    "http://api.themoviedb.org/3/search/movie?";
+            final String QUERY_PARAM = "query";
             final String API_PARAM = "api_key";
             final String API_KEY = mContext.getString(R.string.api_key);;
 
             //Url of json file no need to uri builder
             Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
+                    .appendQueryParameter(QUERY_PARAM, params[0])
                     .appendQueryParameter(API_PARAM, API_KEY)
                     .build();
 
             URL url = new URL(builtUri.toString());
 
-            Log.d("Trailers link",builtUri.toString());
+            Log.d("link search",builtUri.toString());
             // Create the request to url, and open the connection
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
@@ -110,7 +120,7 @@ public class FetchTrailerData extends AsyncTask<String, Void, Void> {
 
         try
         {
-            GetTrailersDataFromJson(movieJsonStr, params[0]);
+             GetMovieDataFromJson(movieJsonStr);
         } catch (JSONException e) {
             e.printStackTrace();
             Log.i("Error", e.getMessage());
@@ -121,17 +131,21 @@ public class FetchTrailerData extends AsyncTask<String, Void, Void> {
     }
 
     /**parse return string from request and insert into database**/
-    private void GetTrailersDataFromJson(String movieJsonStr, String movieId) throws JSONException {
+    private void GetMovieDataFromJson(String movieJsonStr) throws JSONException {
 
         // These are the names of the JSON objects that need to be extracted.
         final String Array_RESULT = "results";
-        final String TRAILER_NAME = "name";
-        final String TRAILER_KEY = "key";
+        final String MOVIE_ID = "id";
+        final String MOVIE_ORIGINAL_TITLE = "original_title";
+        final String MOVIE_RELEASE_DATE = "release_date";
+        final String MOVIE_OVERVIEW = "overview";
+        final String MOVIE_POSTER_PATH = "poster_path";
+        final String MOVIE_VOTE_AVERAGE = "vote_average";
 
         JSONObject movieJson = new JSONObject(movieJsonStr);
         JSONArray movieArray = movieJson.getJSONArray(Array_RESULT);
 
-        // Insert the new trailers information into the database
+        // Insert the new Movies information into the database
         Vector<ContentValues> cVVector = new Vector<ContentValues>(movieArray.length());
 
         for(int i = 0; i < movieArray.length(); i++) {
@@ -141,30 +155,24 @@ public class FetchTrailerData extends AsyncTask<String, Void, Void> {
             //get data from Object and append to content Values Vector
             ContentValues moviesValues = new ContentValues();
 
-            moviesValues.put(MoviesContract.COLUMN_MOV_ID,movieId);
-            moviesValues.put(MoviesContract.TrailersEntry.COLUMN_TRI_NAME, movieObject.getString(TRAILER_NAME));
-            moviesValues.put(MoviesContract.TrailersEntry.COLUMN_TRI_LINK, movieObject.getString(TRAILER_KEY));
+            moviesValues.put(MoviesContract.COLUMN_MOV_ID, movieObject.getLong(MOVIE_ID));
+            moviesValues.put(MoviesContract.COLUMN_MOV_ORIGINAL_TITLE, movieObject.getString(MOVIE_ORIGINAL_TITLE));
+            moviesValues.put(MoviesContract.COLUMN_MOV_RELEASE_DATE, movieObject.getString(MOVIE_RELEASE_DATE));
+            moviesValues.put(MoviesContract.COLUMN_MOV_OVERVIEW, movieObject.getString(MOVIE_OVERVIEW));
+            moviesValues.put(MoviesContract.COLUMN_MOV_POSTER_PATH, movieObject.getString(MOVIE_POSTER_PATH));
+            moviesValues.put(MoviesContract.COLUMN_MOV_VOTE_AVERAGE, movieObject.getDouble(MOVIE_VOTE_AVERAGE));
 
             cVVector.add(moviesValues);
         }
-
-        // build uri of Trailers and trailers with id
-        Uri trailerUri = MoviesContract.TrailersEntry.CONTENT_URI;
-        Uri trailerWithIdUri = MoviesContract.TrailersEntry.buildTrailerUriWithMovieId(Long.valueOf(movieId));
-
-        int deleted = 0;
-        //delete data from database
-        deleted = mContext.getContentResolver().delete(trailerWithIdUri,null,null);
-        Log.d("Trailers Row Deleted ",String.valueOf(deleted));
 
         int inserted = 0;
         // add to database
         if ( cVVector.size() > 0 ) {
             ContentValues[] cvArray = new ContentValues[cVVector.size()];
             cVVector.toArray(cvArray);
-            inserted = mContext.getContentResolver().bulkInsert(trailerUri, cvArray);
+            inserted = mContext.getContentResolver().bulkInsert(mSearchUri, cvArray);
         }
-        Log.d("Trailer Row Inserted ",String.valueOf(inserted));
-
+        Log.d("Search Row Inserted ",String.valueOf(inserted));
     }
+
 }

@@ -30,6 +30,7 @@ public class MoviesContract {
     public static final String PATH_FAVORITES= "favorite";
     public static final String PATH_TRAILERS= "trailers";
     public static final String PATH_REVIEWS= "reviews";
+    public static final String PATH_SEARCH= "search";
 
     /* Tables Common Column */
     // Column with the id of the movie.
@@ -118,7 +119,28 @@ public class MoviesContract {
         public static Uri buildFavoriteMoviesUriWithMovieId(Long movieId) {
             return CONTENT_URI.buildUpon().appendPath(String.valueOf(movieId)).build();
         }
+    }
 
+    /* Inner class that defines the table contents of the temporry Search results table */
+    public static final class SearchEntry implements BaseColumns {
+
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_SEARCH).build();
+
+        public static final String CONTENT_TYPE =
+                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_SEARCH;
+        public static final String CONTENT_ITEM_TYPE =
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_SEARCH;
+
+        public static final String TABLE_NAME = "search";
+
+        public static Uri buildSearchMovieUriWithID(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public static Uri buildSearchMoviesUriWithMovieId(Long movieId) {
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(movieId)).build();
+        }
     }
 
     /* Inner class that defines the table contents of the Trailers table */

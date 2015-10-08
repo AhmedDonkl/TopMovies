@@ -232,7 +232,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private void inflateTrailersList(Cursor trailersData){
         trailersList = Utility.convertCursorToTrailerList(trailersData);
         ExpandableTrailersAdapter trailersAdapter = new ExpandableTrailersAdapter(getActivity(),trailersList);
-
         trailersExpandableList.setAdapter(trailersAdapter);
         trailersExpandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
@@ -271,7 +270,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private void inflateReviewsList(Cursor reviewData){
         reviewsList = Utility.convertCursorToReviewList(reviewData);
         ExpandableReviewAdapter reviewAdapter = new ExpandableReviewAdapter(getActivity(),reviewsList);
-
         reviewsExpandableList.setAdapter(reviewAdapter);
         reviewsExpandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override

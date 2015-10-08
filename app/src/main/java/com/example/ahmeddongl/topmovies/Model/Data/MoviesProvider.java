@@ -27,8 +27,10 @@ public class MoviesProvider extends ContentProvider {
     static final int TRAILERS_WITH_MOVIE_ID = 108;
     static final int REVIEWS = 109;
     static final int REVIEWS_WITH_MOVIE_ID = 110;
-    static final int POPULAR_FIRST_MOVIE_ID = 111;
-    static final int HIGHEST_FIRST_MOVIE_ID = 112;
+    static final int SEARCH = 111;
+    static final int SEARCH_WITH_MOVIE_ID = 112;
+    static final int POPULAR_FIRST_MOVIE_ID = 113;
+    static final int HIGHEST_FIRST_MOVIE_ID = 114;
 
     //Movies.movies_id = ?
     private static final String sMoviesIDSelection =
@@ -64,15 +66,30 @@ public class MoviesProvider extends ContentProvider {
         matcher.addURI(authority, MoviesContract.PATH_REVIEWS, REVIEWS);
         matcher.addURI(authority, MoviesContract.PATH_REVIEWS  + "/#", REVIEWS_WITH_MOVIE_ID);
 
+        matcher.addURI(authority, MoviesContract.PATH_SEARCH, SEARCH);
+        matcher.addURI(authority, MoviesContract.PATH_SEARCH  + "/#", SEARCH_WITH_MOVIE_ID);
+
         matcher.addURI(authority, MoviesContract.PATH_MOST_POPULAR  + "/first", POPULAR_FIRST_MOVIE_ID);
         matcher.addURI(authority, MoviesContract.PATH_HIGHEST_RATED  + "/first", HIGHEST_FIRST_MOVIE_ID);
 
         return matcher;
     }
 
+    private Cursor getSearchWithMovieId(Uri uri, String[] projection, String sortOrder) {
+        String id = uri.getPathSegments().get(1);
+        return mOpenHelper.getReadableDatabase().query(
+                MoviesContract.SearchEntry.TABLE_NAME,
+                projection,
+                sMoviesIDSelection,
+                new String[]{id},
+                null,
+                null,
+                sortOrder
+        );
+    }
+
     private Cursor getPopularMoviesWithMovieId(Uri uri, String[] projection, String sortOrder) {
         String id = uri.getPathSegments().get(1);
-
         return mOpenHelper.getReadableDatabase().query(
                 MoviesContract.MostPopularEntry.TABLE_NAME,
                 projection,
@@ -86,7 +103,6 @@ public class MoviesProvider extends ContentProvider {
 
     private Cursor getHighestMoviesWithMovieId(Uri uri, String[] projection, String sortOrder) {
         String id = uri.getPathSegments().get(1);
-
         return mOpenHelper.getReadableDatabase().query(
                 MoviesContract.HighestRatedEntry.TABLE_NAME,
                 projection,
@@ -100,7 +116,6 @@ public class MoviesProvider extends ContentProvider {
 
     private Cursor getFavoriteMoviesWithMovieId(Uri uri, String[] projection, String sortOrder) {
         String id = uri.getPathSegments().get(1);
-
         return mOpenHelper.getReadableDatabase().query(
                 MoviesContract.FavoriteEntry.TABLE_NAME,
                 projection,
@@ -114,7 +129,6 @@ public class MoviesProvider extends ContentProvider {
 
     private Cursor getTrailerWithMovieId(Uri uri, String[] projection, String sortOrder) {
         String id = uri.getPathSegments().get(1);
-
         return mOpenHelper.getReadableDatabase().query(
                 MoviesContract.TrailersEntry.TABLE_NAME,
                 projection,
@@ -128,7 +142,6 @@ public class MoviesProvider extends ContentProvider {
 
     private Cursor getReviewWithMovieId(Uri uri, String[] projection, String sortOrder) {
         String id = uri.getPathSegments().get(1);
-
         return mOpenHelper.getReadableDatabase().query(
                 MoviesContract.ReviewsEntry.TABLE_NAME,
                 projection,
@@ -177,6 +190,11 @@ public class MoviesProvider extends ContentProvider {
             case REVIEWS_WITH_MOVIE_ID:
                 return MoviesContract.ReviewsEntry.CONTENT_ITEM_TYPE;
 
+            case SEARCH:
+                return MoviesContract.SearchEntry.CONTENT_TYPE;
+            case SEARCH_WITH_MOVIE_ID:
+                return MoviesContract.SearchEntry.CONTENT_ITEM_TYPE;
+
             case POPULAR_FIRST_MOVIE_ID:
                 return MoviesContract.MostPopularEntry.CONTENT_ITEM_TYPE;
             case HIGHEST_FIRST_MOVIE_ID:
@@ -221,6 +239,20 @@ public class MoviesProvider extends ContentProvider {
                 break;
             case HIGHEST_RATED_WITH_MOVIE_ID:
                 retCursor = getHighestMoviesWithMovieId(uri, projection, sortOrder);
+                break;
+            case SEARCH:
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        MoviesContract.SearchEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+            case SEARCH_WITH_MOVIE_ID:
+                retCursor = getSearchWithMovieId(uri, projection, sortOrder);
                 break;
             case FAVORITES:
                 retCursor = mOpenHelper.getReadableDatabase().query(
@@ -323,6 +355,10 @@ public class MoviesProvider extends ContentProvider {
                 rowsDeleted = db.delete(
                         MoviesContract.HighestRatedEntry.TABLE_NAME, selection, selectionArgs);
                 break;
+            case SEARCH:
+                rowsDeleted = db.delete(
+                        MoviesContract.SearchEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             case FAVORITES:
                 rowsDeleted = db.delete(
                         MoviesContract.FavoriteEntry.TABLE_NAME, selection, selectionArgs);
@@ -407,6 +443,22 @@ public class MoviesProvider extends ContentProvider {
                 try {
                     for (ContentValues value : values) {
                         long _id = db.insert(MoviesContract.HighestRatedEntry.TABLE_NAME, null, value);
+                        if (_id != -1) {
+                            returnCount++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                getContext().getContentResolver().notifyChange(uri, null);
+                return returnCount;
+            case SEARCH:
+                db.beginTransaction();
+                 returnCount = 0;
+                try {
+                    for (ContentValues value : values) {
+                        long _id = db.insert(MoviesContract.SearchEntry.TABLE_NAME, null, value);
                         if (_id != -1) {
                             returnCount++;
                         }

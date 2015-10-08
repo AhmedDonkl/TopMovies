@@ -19,14 +19,16 @@ import java.util.List;
  * Created by Ahmed Donkl on 9/18/2015.
  */
 
+/** Utility help function class**/
 public class Utility {
-
+    /** return sort base saved on shared preference**/
     public static String getPreferredSortBy(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getString(context.getString(R.string.pref_sort_key),
                 context.getString(R.string.pref_sort_default));
     }
 
+    /** convert cursor to movie object**/
     public static Movie convertCursorRowToMovieObject(Cursor cursor) {
         ContentValues cv = new ContentValues();
         DatabaseUtils.cursorRowToContentValues(cursor,cv);
@@ -41,6 +43,7 @@ public class Utility {
         );
     }
 
+    /** convert cursor to trailers list**/
     public static List<Trailer> convertCursorToTrailerList(Cursor cursor) {
         List<Trailer> trailersList = new ArrayList<>();
         ContentValues cv = new ContentValues();
@@ -55,6 +58,7 @@ public class Utility {
         return trailersList;
     }
 
+    /** convert cursor to reviews list**/
     public static List<Review> convertCursorToReviewList(Cursor cursor) {
         List<Review> reviewsList = new ArrayList<>();
         ContentValues cv = new ContentValues();
@@ -69,9 +73,9 @@ public class Utility {
         return reviewsList;
     }
 
+    /** convert movie object to content value**/
     public static ContentValues convertMovieObjectToContentValue(Movie movie) {
         ContentValues moviesValues = new ContentValues();
-
         moviesValues.put(MoviesContract.COLUMN_MOV_ID, movie.id);
         moviesValues.put(MoviesContract.COLUMN_MOV_ORIGINAL_TITLE,movie.originalTitle );
         moviesValues.put(MoviesContract.COLUMN_MOV_RELEASE_DATE, movie.releaseDate);
@@ -81,5 +85,4 @@ public class Utility {
 
         return moviesValues;
     }
-
 }

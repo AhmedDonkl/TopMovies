@@ -120,6 +120,7 @@ public class FetchReviewData extends AsyncTask<String, Void, Void> {
         return null;
     }
 
+    /**parse return string from request and insert into database**/
     private void GetReviewsDataFromJson(String movieJsonStr, String movieId) throws JSONException {
 
         // These are the names of the JSON objects that need to be extracted.

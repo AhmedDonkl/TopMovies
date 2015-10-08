@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -66,23 +68,6 @@ public class MoviesList extends ActionBarActivity implements MoviesListFragment.
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         //implement navigation drawer
         navigationDrawerImplementation();
-        //handle search intent
-        handleIntent(this.getIntent());
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        handleIntent(intent);
-    }
-
-    //handle search intent
-    private void handleIntent(Intent intent) {
-
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            //use the query to search your data somehow
-            Toast.makeText(this, query, Toast.LENGTH_LONG).show();
-        }
     }
 
     //implement navigation drawer
@@ -104,7 +89,7 @@ public class MoviesList extends ActionBarActivity implements MoviesListFragment.
         mDrawerToggle = new ActionBarDrawerToggle (
                 this,         /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
-                R.mipmap.ic_launcher,  /* nav drawer icon to replace 'Up' caret */
+                R.drawable.ic_action_ic_drawer,  /* nav drawer icon to replace 'Up' caret */
                 R.string.drawer_open,  /* "open drawer" description */
                 R.string.drawer_close  /* "close drawer" description */
         ) {
@@ -223,15 +208,40 @@ public class MoviesList extends ActionBarActivity implements MoviesListFragment.
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_movies_list, menu);
         // Associate searchable configuration with the SearchView
-        SearchManager searchManager =
+        final SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
+        final SearchView searchView =
                 (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
-        // Do not iconify the widget;expand it by default
-        searchView.setIconifiedByDefault(false);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                //check if there's internet to search
+                if(isOnline()){
+                    searchView.setSearchableInfo(
+                            searchManager.getSearchableInfo(getComponentName()));
+                }
+                else{
+                    Toast.makeText(getApplication(), "No Internet Connection", Toast.LENGTH_LONG).show();
+                }
+                return false;
+            }
+            @Override
+            public boolean onQueryTextChange(String s) {
+                return false;
+            }
+
+        });
+                // Do not iconify the widget;expand it by default
+                searchView.setIconifiedByDefault(false);
         return true;
+    }
+
+    /** to check if there's internet connection available **/
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     @Override

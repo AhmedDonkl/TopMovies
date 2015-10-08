@@ -14,7 +14,6 @@ public class Movie {
     public  double voteAverage;
 
     public Movie(Long id,String originalTitle,String releaseDate,String overview,String posterPath,double voteAverage) {
-
         this.id=id;
         this.originalTitle=originalTitle;
         this.releaseDate=releaseDate;

@@ -24,8 +24,8 @@ public class SearchResultsFragment extends Fragment implements LoaderManager.Loa
     private MovieAdapter mSearchAdapter;
     private static final int SEARCH_LOADER = 0;
 
-    //restore scroll position
     private GridView mGridView;
+    //restore scroll position
     private int mPosition = GridView.INVALID_POSITION;
     private static final String SELECTED_KEY = "selected_position";
 
@@ -126,7 +126,6 @@ public class SearchResultsFragment extends Fragment implements LoaderManager.Loa
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         mSearchAdapter.swapCursor(cursor);
-
         if (mPosition != GridView.INVALID_POSITION) {
             // If we don't need to restart the loader, and there's a desired position to restore
             // to, do so now.
@@ -137,11 +136,6 @@ public class SearchResultsFragment extends Fragment implements LoaderManager.Loa
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
         mSearchAdapter.swapCursor(null);
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 }
 

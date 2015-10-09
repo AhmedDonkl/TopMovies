@@ -29,7 +29,7 @@
     <!-- Value in SharedPreferences for favorite option [CHAR LIMIT=NONE] -->
     <string name="pref_sort_favorite" translatable="false">favorite</string>
     <!-- Value in SharedPreferences for favorite option [CHAR LIMIT=NONE] -->
-    <string name="api_key"> </string>
+    <string name="api_key">b821c2f9d27847f2406a800b7a3afe84</string>
     <string name="title_activity_search_results">SearchResultsActivity</string>
 
     <!-- SyncAdapter related -->

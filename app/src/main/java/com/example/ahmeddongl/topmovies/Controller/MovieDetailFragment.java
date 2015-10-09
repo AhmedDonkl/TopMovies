@@ -473,7 +473,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
         // Load the high-resolution "zoomed-in" image.
         final ImageView expandedImageView = expandedImage;
-        Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/original" +mPosterLink)
+        Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/w185" +mPosterLink)
                 .into(expandedImageView);
 
         // Calculate the starting and ending bounds for the zoomed-in image.

@@ -1,13 +1,20 @@
-package com.example.ahmeddongl.topmovies.Model.FetchData;
+package com.example.ahmeddongl.topmovies.Model.sync;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.AbstractThreadedSyncAdapter;
+import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SyncResult;
 import android.net.Uri;
-import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.example.ahmeddongl.topmovies.Model.Data.MoviesContract;
 import com.example.ahmeddongl.topmovies.R;
+import com.example.ahmeddongl.topmovies.Utility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,21 +29,19 @@ import java.net.URL;
 import java.util.Vector;
 
 /**
- * Created by Ahmed Dongl on 8/22/2015.
+ * Created by Ahmed Donkl on 10/9/2015.
  */
+public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
+    public final String LOG_TAG = MoviesSyncAdapter.class.getSimpleName();
 
-/*this class responsible for fetch movie data from api */
-public class FetchMovieData extends AsyncTask<String, Void, Void> {
-
-    private final Context mContext;
-
-    public FetchMovieData(Context context) {
-        mContext = context;
+    public MoviesSyncAdapter(Context context, boolean autoInitialize) {
+        super(context, autoInitialize);
     }
 
     @Override
-    protected Void doInBackground(String... params) {
-
+    public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+        Log.d(LOG_TAG, "onPerformSync Called.");
+        String sortBy = Utility.getPreferredSortBy(getContext());
         // These two need to be declared outside the try/catch
         // so that they can be closed in the finally block.
         HttpURLConnection urlConnection = null;
@@ -50,11 +55,11 @@ public class FetchMovieData extends AsyncTask<String, Void, Void> {
                     "http://api.themoviedb.org/3/discover/movie?";
             final String SORT_PARAM = "sort_by";
             final String API_PARAM = "api_key";
-            final String API_KEY = mContext.getString(R.string.api_key);;
+            final String API_KEY = getContext().getString(R.string.api_key);;
 
             //Url of json file no need to uri builder
             Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
-                    .appendQueryParameter(SORT_PARAM, params[0])
+                    .appendQueryParameter(SORT_PARAM, sortBy)
                     .appendQueryParameter(API_PARAM, API_KEY)
                     .build();
 
@@ -71,7 +76,6 @@ public class FetchMovieData extends AsyncTask<String, Void, Void> {
             StringBuffer buffer = new StringBuffer();
             if (inputStream == null) {
                 // Nothing to do.
-                return null;
             }
             reader = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -85,7 +89,6 @@ public class FetchMovieData extends AsyncTask<String, Void, Void> {
 
             if (buffer.length() == 0) {
                 // Stream was empty.  No point in parsing.
-                return null;
             }
             movieJsonStr = buffer.toString();
 
@@ -94,7 +97,6 @@ public class FetchMovieData extends AsyncTask<String, Void, Void> {
             // to parse it.
             e.printStackTrace();
             Log.i("Error",e.getMessage());
-            return null;
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -111,17 +113,16 @@ public class FetchMovieData extends AsyncTask<String, Void, Void> {
 
         try
         {
-             GetMovieDataFromJson(movieJsonStr,params[0]);
+            GetMovieDataFromJson(movieJsonStr,sortBy);
         } catch (JSONException e) {
             e.printStackTrace();
             Log.i("Error", e.getMessage());
         }
-
-        // This will only happen if there was an error getting or parsing the forecast.
-        return null;
     }
 
-    /**parse return string from request and insert into database**/
+    /**
+     * parse return string from request and insert into database*
+     * */
     private void GetMovieDataFromJson(String movieJsonStr, String sortBy) throws JSONException {
 
         // These are the names of the JSON objects that need to be extracted.
@@ -163,7 +164,7 @@ public class FetchMovieData extends AsyncTask<String, Void, Void> {
 
             int deleted = 0;
             //delete data from database
-            deleted = mContext.getContentResolver().delete(popularMoviesUri,null,null);
+            deleted = getContext().getContentResolver().delete(popularMoviesUri,null,null);
             Log.d("Row Deleted ",String.valueOf(deleted));
 
             int inserted = 0;
@@ -171,7 +172,7 @@ public class FetchMovieData extends AsyncTask<String, Void, Void> {
             if ( cVVector.size() > 0 ) {
                 ContentValues[] cvArray = new ContentValues[cVVector.size()];
                 cVVector.toArray(cvArray);
-                inserted = mContext.getContentResolver().bulkInsert(popularMoviesUri, cvArray);
+                inserted = getContext().getContentResolver().bulkInsert(popularMoviesUri, cvArray);
             }
             Log.d("Row Inserted ",String.valueOf(inserted));
         }
@@ -181,7 +182,7 @@ public class FetchMovieData extends AsyncTask<String, Void, Void> {
 
             int deleted = 0;
             //delete data from database
-            deleted = mContext.getContentResolver().delete(HighestMoviesUri,null,null);
+            deleted = getContext().getContentResolver().delete(HighestMoviesUri,null,null);
             Log.d("Row Deleted ",String.valueOf(deleted));
 
             int inserted = 0;
@@ -189,11 +190,59 @@ public class FetchMovieData extends AsyncTask<String, Void, Void> {
             if ( cVVector.size() > 0 ) {
                 ContentValues[] cvArray = new ContentValues[cVVector.size()];
                 cVVector.toArray(cvArray);
-                inserted = mContext.getContentResolver().bulkInsert(HighestMoviesUri, cvArray);
+                inserted = getContext().getContentResolver().bulkInsert(HighestMoviesUri, cvArray);
             }
             Log.d("Row Inserted ",String.valueOf(inserted));
         }
 
     }
+    /**
+     * Helper method to have the sync adapter sync immediately
+     * @param context The context used to access the account service
+     */
+    public static void syncImmediately(Context context) {
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        ContentResolver.requestSync(getSyncAccount(context),
+                context.getString(R.string.content_authority), bundle);
+    }
 
+    /**
+     * Helper method to get the fake account to be used with SyncAdapter, or make a new one
+     * if the fake account doesn't exist yet.  If we make a new account, we call the
+     * onAccountCreated method so we can initialize things.
+     *
+     * @param context The context used to access the account service
+     * @return a fake account.
+     */
+    public static Account getSyncAccount(Context context) {
+        // Get an instance of the Android account manager
+        AccountManager accountManager =
+                (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+
+        // Create the account type and default account
+        Account newAccount = new Account(
+                context.getString(R.string.app_name), context.getString(R.string.sync_account_type));
+
+        // If the password doesn't exist, the account doesn't exist
+        if ( null == accountManager.getPassword(newAccount) ) {
+
+        /*
+         * Add the account and account type, no password or user data
+         * If successful, return the Account object, otherwise report an error.
+         */
+            if (!accountManager.addAccountExplicitly(newAccount, "", null)) {
+                return null;
+            }
+            /*
+             * If you don't set android:syncable="true" in
+             * in your <provider> element in the manifest,
+             * then call ContentResolver.setIsSyncable(account, AUTHORITY, 1)
+             * here.
+             */
+
+        }
+        return newAccount;
+    }
 }

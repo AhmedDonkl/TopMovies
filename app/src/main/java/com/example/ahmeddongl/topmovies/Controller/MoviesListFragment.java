@@ -14,11 +14,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import com.example.ahmeddongl.topmovies.R;
-import com.example.ahmeddongl.topmovies.Utility;
 import com.example.ahmeddongl.topmovies.Controller.Adapters.MovieAdapter;
 import com.example.ahmeddongl.topmovies.Model.Data.MoviesContract;
-import com.example.ahmeddongl.topmovies.Model.FetchData.FetchMovieData;
+import com.example.ahmeddongl.topmovies.Model.sync.MoviesSyncAdapter;
+import com.example.ahmeddongl.topmovies.R;
+import com.example.ahmeddongl.topmovies.Utility;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -196,7 +196,9 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
         setHasOptionsMenu(true);
     }
 
-    // since we read sort by when we create the loader, all we need to do is restart things
+    /*
+     since we read sort by when we create the loader, all we need to do is restart things
+     */
     void onSortByChanged( ) {
         updateMovies();
         getLoaderManager().restartLoader(MOVIES_LOADER, null, this);
@@ -204,8 +206,6 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     }
 
     public void updateMovies() {
-        FetchMovieData movieTask = new FetchMovieData(getActivity());
-        String sortBy = Utility.getPreferredSortBy(getActivity());
-        movieTask.execute(sortBy);
+        MoviesSyncAdapter.syncImmediately(getActivity());
     }
 }

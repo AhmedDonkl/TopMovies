@@ -1,3 +1,6 @@
+# Top Movies Andriod app
+this app help people to know latest movies in cinemas with the highest rated or most popular 
+it caches the movie data for offline mode and making your own favorites list
 This is Udacity Final Project made by ahmed abd el-fatah abd el-naem this is final project for udacity
 
 I implement all optional features and i added some extra features like :
